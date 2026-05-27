@@ -71,7 +71,7 @@ const STRONG_VERBS = ["Engineered", "Architected", "Spearheaded", "Orchestrated"
 const WEAK_VERBS = ["worked on", "helped with", "was responsible for", "assisted", "participated in"];
 
 // 2. ATS EVALUATION ENGINE
-function calcATS(form, company) {
+function calcATS(form, selectedCompanies) {
   let score = 0;
   const issues = [];
   const wins = [];
@@ -92,8 +92,8 @@ function calcATS(form, company) {
   const exps = form.experience.filter(e => e.company || e.role);
   const projs = form.projects.filter(p => p.title);
 
-  // If student profile is selected, we relax the mandatory job experience rule
-  if (company === "Student") {
+  // Relax work experience rule if Student is part of selection profile
+  if (selectedCompanies.includes("Student")) {
     if (exps.length > 0 || projs.length > 0) {
       score += 15;
       wins.push("Academic projects or training records found");
@@ -116,14 +116,22 @@ function calcATS(form, company) {
   if (edus.length > 0) { score += 10; wins.push("Education credentials present"); }
   else { issues.push("Add your college/school education details"); }
 
-  if (company && COMPANY_PROFILES[company]) {
+  if (selectedCompanies.length > 0) {
     const allText = (form.summary + " " + form.skills + " " + form.experience.map(e => e.description).join(" ") + " " + form.projects.map(p => p.title + " " + p.problem).join(" ")).toLowerCase();
-    const matched = COMPANY_PROFILES[company].keywords.filter(k => allText.includes(k.toLowerCase()));
-    if (matched.length >= 2) {
+    
+    let combinedKeywords = [];
+    selectedCompanies.forEach(co => {
+      combinedKeywords = [...combinedKeywords, ...COMPANY_PROFILES[co].keywords];
+    });
+    // Distinct values
+    combinedKeywords = [...new Set(combinedKeywords)];
+
+    const matched = combinedKeywords.filter(k => allText.includes(k.toLowerCase()));
+    if (matched.length >= Math.min(4, combinedKeywords.length)) {
       score += 16;
-      wins.push(`${matched.length} alignment profile tags active`);
+      wins.push(`${matched.length} cross-profile keyword targets met`);
     } else {
-      issues.push(`Add profile keywords: ${COMPANY_PROFILES[company].keywords.slice(0, 3).join(", ")}`);
+      issues.push(`Target more stack profile tags (${selectedCompanies.join(", ")})`);
     }
   }
 
@@ -135,7 +143,7 @@ function calcATS(form, company) {
 }
 
 // 3. GENERATION AUTOMATION ENHANCEMENTS
-function enhanceBullet(desc, role, company) {
+function enhanceBullet(desc, role, selectedCompanies) {
   if (!desc || desc.trim().length < 5) return "Developed software layers, designed core logic routines, and validated framework performance.";
   let out = desc.trim();
 
@@ -144,8 +152,10 @@ function enhanceBullet(desc, role, company) {
     out = out.replace(re, "Spearheaded design and implementation of");
   });
 
-  if (company && COMPANY_PROFILES[company]) {
-    const randomBoost = COMPANY_PROFILES[company].boost[0];
+  if (selectedCompanies.length > 0) {
+    // Pick first available boost statement from active criteria layers
+    const primaryTarget = selectedCompanies[selectedCompanies.length - 1];
+    const randomBoost = COMPANY_PROFILES[primaryTarget].boost[0];
     if (!out.toLowerCase().includes(randomBoost.split(" ")[0])) {
       out = out.replace(/[.,]?\s*$/, "") + ` and successfully ${randomBoost}`;
     }
@@ -154,7 +164,7 @@ function enhanceBullet(desc, role, company) {
   return out.charAt(0).toUpperCase() + out.slice(1);
 }
 
-function buildProjectBullet(p, company) {
+function buildProjectBullet(p, selectedCompanies) {
   const tech = p.tech ? ` using ${p.tech}` : "";
   const prob = p.problem ? ` to solve ${p.problem}` : "";
   const built = p.built ? `, building ${p.built}` : "";
@@ -163,23 +173,24 @@ function buildProjectBullet(p, company) {
   return `Architected ${p.title}${tech}${prob}${built}${result}`;
 }
 
-function generateSummary(form, company) {
+function generateSummary(form, selectedCompanies) {
   if (form.summary && form.summary.trim().length > 30) return form.summary;
 
   const skills = form.skills.split(",").slice(0, 3).map(s => s.trim()).filter(Boolean);
   const targetRole = form.role || "Software Engineering Enthusiast";
 
-  let base = `Detail-oriented student and aspiring ${targetRole}`;
-  if (skills.length > 0) base += ` with strong foundational knowledge in ${skills.join(", ")}`;
-  base += `. Competent in software development principles, algorithmic logic, and modern code frameworks. Proven through hands-on academic coursework and practical project deliverables.`;
+  let base = `Detail-oriented engineer and aspiring ${targetRole}`;
+  if (skills.length > 0) base += ` with foundational specialization in ${skills.join(", ")}`;
+  base += `. Competent in software development principles, operational algorithms, and scalable framework logic. Proven through practical deliverables and cross-functional design builds.`;
 
-  if (company && company !== "Student" && COMPANY_PROFILES[company]) {
-    base += ` Eager to bring this technical drive to the entry-level development tracks at ${company}.`;
+  const corporateTargets = selectedCompanies.filter(c => c !== "Student");
+  if (corporateTargets.length > 0) {
+    base += ` Target ecosystem tracking focus aimed at development parameters aligned with ${corporateTargets.join(" and ")} infrastructures.`;
   }
   return base;
 }
 
-// 4. DESIGN TYPOGRAPHY AND LAYOUT MATRIX
+// 4. DESIGN TYPOGRAPHY AND LAYOUT MATRIX (UPGRADED FOR FULL RESPONSIVENESS)
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,700;0,900;1,700&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -201,9 +212,9 @@ body { background: var(--bg); color: var(--text); font-family: var(--mono); }
 .brand-dot { width:8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow:0 0 10px var(--accent); }
 .brand-name { font-family: var(--display); font-size:18px; font-weight:700; color:#fff; }
 .brand-tag { font-size: 9px; letter-spacing:3px; color:var(--sub); }
-.hero { margin-bottom:52px; }
+.hero { margin-bottom:40px; }
 .hero-kicker { font-size: 9px; letter-spacing:5px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
-.hero-h { font-family: var(--display); font-size:clamp(32px,6vw, 52px); font-weight:900; color:#fff; line-height:1.1; margin-bottom:12px; }
+.hero-h { font-family: var(--display); font-size:clamp(28px, 5vw, 48px); font-weight:900; color:#fff; line-height:1.1; margin-bottom:12px; }
 .hero-h em { font-style: italic; color:var(--accent); }
 .hero-sub { font-size:12px; color: var(--sub); line-height: 1.8; max-width: 460px; }
 .sec { margin-bottom: 40px; }
@@ -211,8 +222,11 @@ body { background: var(--bg); color: var(--text); font-family: var(--mono); }
 .sec-n { font-size: 9px; letter-spacing:3px; color:var(--accent); }
 .sec-title { font-family: var(--display); font-size:16px; font-weight:700; color:#fff; }
 .sec-line { flex:1; height: 1px; background: var(--border); }
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+
+/* Grid systems optimized for responsive wrapping */
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+
 .field { margin-bottom:14px; }
 .field label { display:block; font-size:8px; letter-spacing:3px; color:var(--sub); text-transform: uppercase; margin-bottom:6px; }
 .field input, .field textarea, .field select {
@@ -223,26 +237,32 @@ body { background: var(--bg); color: var(--text); font-family: var(--mono); }
 .field input:focus, .field textarea:focus { border-color:var(--accent); }
 .card { background: var(--s1); border:1px solid var(--border); border-radius:14px; padding:24px; position:relative; margin-bottom:16px; }
 .card-badge { position:absolute; top:-10px; left:20px; background: var(--bg); padding: 0 8px; font-size:8px; letter-spacing:3px; color:var(--accent); }
-.co-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:10px; }
-.co-btn { background: var(--s2); border:1px solid var(--border); border-radius:10px; padding:16px 8px; text-align:center; cursor:pointer; transition: all .15s; }
+
+/* Responsive Grid layout for ecosystems */
+.co-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.co-btn { background: var(--s2); border:1px solid var(--border); border-radius:10px; padding:16px 8px; text-align:center; cursor:pointer; transition: all .15s; position: relative; }
 .co-btn.active { border-color:var(--accent); background:rgba(200,245,106,.06); }
 .co-icon { font-size:22px; margin-bottom:5px; }
-.co-name { font-size:10px; color:var(--text); }
+.co-name { font-size:10px; color:var(--text); font-weight: 500; }
+.co-check { position: absolute; top: 6px; right: 8px; font-size: 9px; color: var(--accent); opacity: 0; }
+.co-btn.active .co-check { opacity: 1; }
+
 .co-tip { margin-top:14px; background: var(--s2); border:1px solid var(--border); border-radius:10px; padding:16px; font-size:11px; color:var(--sub); line-height:1.7; }
 .co-kws { display: flex; flex-wrap:wrap; gap: 6px; margin-top:10px; }
 .co-kw { background: var(--s3); border:1px solid var(--border2); border-radius: 4px; padding:3px 8px; font-size:9px; color:var(--accent); }
 
 /* ATS MONITOR PANEL */
 .ats-panel { background: var(--s1); border:1px solid var(--border); border-radius:14px; padding:24px; margin-top:32px; }
-.ats-top { display: flex; align-items:center; gap:20px; margin-bottom:20px; }
-.ats-ring { width: 82px; height: 82px; border-radius: 50%; border:2px solid var(--border); display: flex; flex-direction:column; align-items:center; justify-content:center; }
+.ats-top { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 20px; }
+.ats-ring { width: 82px; height: 82px; border-radius: 50%; border:2px solid var(--border); display: flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink: 0; }
 .ats-num { font-family: var(--display); font-size: 28px; font-weight: 900; line-height:1; }
 .ats-sub { font-size:8px; letter-spacing: 2px; margin-top:2px; color:var(--sub); }
-.ats-bar-wrap { flex:1; }
+.ats-bar-wrap { flex:1; min-width: 240px; }
 .ats-bar-labels { display: flex; justify-content: space-between; font-size: 9px; color:var(--sub); margin-bottom:8px; }
 .ats-bar-bg { height: 6px; background: var(--muted); border-radius: 99px; overflow:hidden; }
-.ats-bar-fill { height:100%; border-radius: 99px; background:var(--accent); }
-.ats-cols { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.ats-bar-fill { height:100%; border-radius: 99px; background:var(--accent); transition: width 0.3s ease; }
+.ats-info { font-size: 11px; margin-top: 8px; color: var(--sub); line-height: 1.5; }
+.ats-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
 .ats-col-t { font-size: 8px; letter-spacing:3px; margin-bottom:10px; text-transform:uppercase; font-weight:700; }
 .ats-item { display: flex; align-items: center; gap:8px; font-size:11px; margin-bottom:6px; color:var(--text); }
 .skill-preview { display: flex; flex-wrap:wrap; gap: 6px; margin-top:8px; }
@@ -251,6 +271,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--mono); }
 /* SYSTEM CONTROLS BUTTONS */
 .btn { border:none; border-radius: 9px; padding: 13px 26px; font-weight:500; font-family:var(--mono); font-size:12px; cursor:pointer; transition:all .15s; }
 .btn-accent { background: var(--accent); color: #060a00; font-weight:700; }
+.btn-accent:disabled { background: var(--muted); color: var(--sub); cursor: not-allowed; }
 .btn-ghost { background: transparent; color:var(--sub); border:1px solid var(--border); }
 .btn-ghost:hover { color: var(--text); border-color:var(--border2); }
 .btn-add { width:100%; background: transparent; border:1px dashed var(--border); border-radius:10px; padding:14px; color:var(--sub); font-family:var(--mono); font-size:11px; cursor:pointer; margin-top:4px; }
@@ -268,10 +289,16 @@ body { background: var(--bg); color: var(--text); font-family: var(--mono); }
   background: #FFFFFF !important;
   color: #111111 !important;
   font-family: 'Inter', -apple-system, sans-serif !important;
-  padding: 50px 55px !important;
+  padding: 40px 45px !important;
   border-radius: 6px !important;
   box-shadow: 0 4px 24px rgba(0,0,0,0.15) !important;
   line-height: 1.5 !important;
+}
+.r-co-badges {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  margin-bottom: 24px !important;
 }
 .r-co-badge {
   display: inline-block !important;
@@ -282,13 +309,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--mono); }
   font-size: 10px !important;
   color: #4b5563 !important;
   font-family: var(--mono) !important;
-  margin-bottom: 24px !important;
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
 }
 .r-hd { border-bottom: 2px solid #111111 !important; padding-bottom: 12px !important; margin-bottom: 20px !important; }
-.r-name { font-family: var(--display) !important; font-size: 32px !important; font-weight: 800 !important; color: #111111 !important; line-height: 1.1 !important; letter-spacing: -0.5px !important; }
-.r-role { font-size: 14px !important; color: #4b5563 !important; font-weight: 500 !important; margin-top: 4px !important; margin-bottom: 8px !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
+.r-name { font-family: var(--display) !important; font-size: clamp(24px, 4vw, 32px) !important; font-weight: 800 !important; color: #111111 !important; line-height: 1.1 !important; letter-spacing: -0.5px !important; }
+.r-role { font-size: 13px !important; color: #4b5563 !important; font-weight: 500 !important; margin-top: 4px !important; margin-bottom: 8px !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .r-contacts { display: flex !important; flex-wrap: wrap !important; gap: 0 14px !important; font-size: 11px !important; color: #6b7280 !important; }
 .r-sec { margin-bottom: 20px !important; }
 .r-sec-t { font-size: 11px !important; font-weight: 700 !important; color: #111111 !important; text-transform: uppercase !important; letter-spacing: 1.5px !important; border-bottom: 1px solid #e5e7eb !important; padding-bottom: 4px !important; margin-bottom: 10px !important; }
@@ -296,12 +322,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--mono); }
 .r-skills { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
 .r-skill { background: #f3f4f6 !important; border: 1px solid #e5e7eb !important; color: #111111 !important; font-size: 11px !important; padding: 3px 8px !important; border-radius: 4px !important; font-weight: 500 !important; }
 .r-exp-item { margin-bottom: 12px !important; }
-.r-exp-header { display: flex !important; justify-content: space-between !important; align-items: baseline !important; font-size: 13px !important; font-weight: 700 !important; color: #111111 !important; }
+.r-exp-header { display: flex !important; justify-content: space-between !important; align-items: baseline !important; font-size: 13px !important; font-weight: 700 !important; color: #111111 !important; flex-wrap: wrap; gap: 4px; }
 .r-exp-role { font-weight: 700 !important; }
 .r-exp-meta { display: flex !important; justify-content: space-between !important; font-size: 11px !important; color: #6b7280 !important; margin-top: 1px !important; margin-bottom: 4px !important; font-style: italic !important; }
 .r-exp-desc { font-size: 12px !important; color: #374151 !important; line-height: 1.5 !important; padding-left: 14px !important; display: list-item !important; list-style-type: disc !important; }
 .r-proj-item { margin-bottom: 12px !important; }
-.r-proj-title-bar { display: flex !important; justify-content: space-between !important; align-items: baseline !important; }
+.r-proj-title-bar { display: flex !important; justify-content: space-between !important; align-items: baseline !important; flex-wrap: wrap; gap: 4px; }
 .r-proj-title { font-size: 13px !important; font-weight: 700 !important; color: #111111 !important; }
 .r-proj-tech { font-size: 11px !important; color: #4b5563 !important; font-weight: 600 !important; font-family: var(--mono) !important; }
 .r-proj-desc { font-size: 12px !important; color: #374151 !important; line-height: 1.5 !important; margin-top: 3px !important; padding-left: 14px !important; display: list-item !important; list-style-type: disc !important; }
@@ -314,9 +340,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--mono); }
 }
 
 @media (max-width: 600px) {
-  .grid2, .grid3 { grid-template-columns: 1fr; }
-  .co-grid { grid-template-columns: repeat(2,1fr); }
-  .resume { padding: 24px !important; }
+  .shell { padding: 20px 14px 60px; }
+  .resume { padding: 24px 18px !important; }
+  .ats-top { flex-direction: column; align-items: flex-start; }
+  .ats-bar-wrap { width: 100%; min-width: 100%; }
 }
 `;
 
@@ -343,8 +370,8 @@ function F({ label, value, onChange, ph, multi }) {
 }
 
 // Live ATS Feedback Component
-function ATSPanel({ form, company }) {
-  const { score, grade, label, issues, wins } = calcATS(form, company);
+function ATSPanel({ form, selectedCompanies }) {
+  const { score, grade, label, issues, wins } = calcATS(form, selectedCompanies);
   const color = score >= 85 ? "#C8F56A" : score >= 70 ? "#7B6FFF" : score >= 55 ? "#FF9900" : "#FF6B6B";
   
   return (
@@ -366,7 +393,9 @@ function ATSPanel({ form, company }) {
             <div className="ats-bar-fill" style={{ width: `${score}%`, backgroundColor: color }}></div>
           </div>
           <div className="ats-info">
-            {score < 55 ? "Fill in academic details or tech skills to bypass student matching filters." : score < 85 ? "Good baseline layout. Inject active coursework or projects to step up." : "Elite optimization metrics reached."}
+            {selectedCompanies.length === 0 
+              ? "Select target strategy layers above to align metrics engines dynamically." 
+              : `Calibrating tracking matrix against ${selectedCompanies.length} active profile layouts.`}
           </div>
         </div>
       </div>
@@ -395,7 +424,7 @@ function ATSPanel({ form, company }) {
 // Primary Core Component Engine
 function App() {
   const [form, setForm] = useState(initForm);
-  const [company, setCompany] = useState(null);
+  const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [generated, setGenerated] = useState(false);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -409,12 +438,22 @@ function App() {
   const addArr = (arr, blank) => setForm(f => ({ ...f, [arr]: [...f[arr], blank] }));
   const rmArr = (arr, i) => setForm(f => ({ ...f, [arr]: f[arr].filter((_, idx) => idx !== i) }));
 
-  const profile = company ? COMPANY_PROFILES[company] : null;
+  // Handle Multi-Select Toggles
+  const handleCompanyToggle = (name) => {
+    setSelectedCompanies(prev => {
+      if (prev.includes(name)) {
+        return prev.filter(c => c !== name);
+      } else {
+        return [...prev, name];
+      }
+    });
+  };
+
   const skills = form.skills.split(",").map(s => s.trim()).filter(Boolean);
   const canGenerate = form.name.trim().length > 0 && form.role.trim().length > 0;
 
   if (generated) {
-    const summary = generateSummary(form, company);
+    const summary = generateSummary(form, selectedCompanies);
     const exps = form.experience.filter(e => e.company || e.role);
     const projs = form.projects.filter(p => p.title);
     const edus = form.education.filter(e => e.institution || e.degree);
@@ -423,16 +462,22 @@ function App() {
       <div className="app">
         <style>{css}</style>
         <div className="shell">
-          <div className="out-label">Resume Generated {company ? `(Optimized for ${company})` : ""}</div>
+          <div className="out-label">Resume Generated {selectedCompanies.length > 0 ? `(Calibrated)` : ""}</div>
           <div className="out-bar">
             <button className="btn btn-ghost" onClick={() => setGenerated(false)}>Return to Editor</button>
-            <button className="btn btn-ghost" onClick={() => { setForm(initForm); setCompany(null); setGenerated(false); }}>Clear All</button>
+            <button className="btn btn-ghost" onClick={() => { setForm(initForm); setSelectedCompanies([]); setGenerated(false); }}>Clear All</button>
             <button className="btn btn-accent" onClick={() => window.print()}>Print / Export PDF</button>
           </div>
           
           {/* PRISTINE CLEAN WHITE RESUME OUTPUT SHEET */}
           <div className="resume">
-            {company && <div className="r-co-badge">✓ Framework Configuration: Custom {company} Calibration Profile</div>}
+            {selectedCompanies.length > 0 && (
+              <div className="r-co-badges">
+                {selectedCompanies.map(co => (
+                  <span key={co} className="r-co-badge">✓ {co} Calibration Layer</span>
+                ))}
+              </div>
+            )}
             
             <div className="r-hd">
               <div className="r-name">{form.name}</div>
@@ -471,7 +516,7 @@ function App() {
                     <div className="r-exp-meta">
                       <span>{e.company}</span>
                     </div>
-                    <div className="r-exp-desc">{enhanceBullet(e.description, e.role, company)}</div>
+                    <div className="r-exp-desc">{enhanceBullet(e.description, e.role, selectedCompanies)}</div>
                   </div>
                 ))}
               </div>
@@ -486,7 +531,7 @@ function App() {
                       <span className="r-proj-title">{p.title}</span>
                       {p.tech && <span className="r-proj-tech">{p.tech}</span>}
                     </div>
-                    <div className="r-proj-desc">{buildProjectBullet(p, company)}</div>
+                    <div className="r-proj-desc">{buildProjectBullet(p, selectedCompanies)}</div>
                   </div>
                 ))}
               </div>
@@ -559,27 +604,33 @@ function App() {
           <F label="LinkedIn URL" value={form.linkedin} onChange={v => set("linkedin", v)} ph="linkedin.com/in/username" />
         </div>
 
-        {/* 02 Company Optimizer */}
+        {/* 02 Company Optimizer (MULTI SELECT) */}
         <div className="sec">
           <div className="sec-head"><span className="sec-n">02</span><span className="sec-title">Target Ecosystem Calibration</span><div className="sec-line"></div></div>
           <div style={{ fontSize: 11, color: "var(--sub)", marginBottom: 16, lineHeight: 1.6 }}>
-            Select your matching target strategy. If you are a student, tap **Student** to switch the rules engine to academic optimization trackers.
+            Select your matching target strategies. You can tap **Student** and simultaneously pick one or more target corporate tracks to overlay key phrase metrics.
           </div>
-          <div className="co-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
-            {Object.entries(COMPANY_PROFILES).map(([name, p]) => (
-              <div key={name} className={`co-btn ${company === name ? "active" : ""}`}
-                   onClick={() => setCompany(c => c === name ? null : name)}
-                   style={company === name ? { borderColor: p.color } : {}}>
-                <div className="co-icon">{p.emoji}</div>
-                <div className="co-name">{name}</div>
-              </div>
-            ))}
+          <div className="co-grid">
+            {Object.entries(COMPANY_PROFILES).map(([name, p]) => {
+              const isSelected = selectedCompanies.includes(name);
+              return (
+                <div key={name} className={`co-btn ${isSelected ? "active" : ""}`}
+                     onClick={() => handleCompanyToggle(name)}
+                     style={isSelected ? { borderColor: p.color } : {}}>
+                  <div className="co-check">✓</div>
+                  <div className="co-icon">{p.emoji}</div>
+                  <div className="co-name">{name}</div>
+                </div>
+              );
+            })}
           </div>
-          {profile && (
+          {selectedCompanies.length > 0 && (
             <div className="co-tip">
-              <strong>Strategy Guidance for {company}:</strong> {profile.tone}
+              <strong>Combined Active Targets:</strong> {selectedCompanies.join(", ")}
               <div className="co-kws">
-                {profile.keywords.map((k, i) => <span key={i} className="co-kw">{k}</span>)}
+                {selectedCompanies.flatMap(co => COMPANY_PROFILES[co].keywords).filter((v, i, a) => a.indexOf(v) === i).slice(0, 8).map((k, i) => (
+                  <span key={i} className="co-kw">{k}</span>
+                ))}
               </div>
             </div>
           )}
@@ -588,7 +639,7 @@ function App() {
         {/* 03 Summary */}
         <div className="sec">
           <div className="sec-head"><span className="sec-n">03</span><span className="sec-title">Professional Summary</span><div className="sec-line"></div></div>
-          <F label="Summary Statement (Leave blank to let compiler auto-generate using Student or Corporate alignment tracking)" value={form.summary} onChange={v => set("summary", v)} ph="Optional baseline brief summary description context..." multi />
+          <F label="Summary Statement (Leave blank to let compiler auto-generate using your multi-select tracking filters)" value={form.summary} onChange={v => set("summary", v)} ph="Optional baseline brief summary description context..." multi />
         </div>
 
         {/* 04 Skills */}
@@ -636,7 +687,7 @@ function App() {
               <F label="Result / Achievement Outcome" value={p.result} onChange={v => updArr("projects", i, "result", v)} ph="passing all grading evaluation units perfectly" />
             </div>
           ))}
-          <button class="btn-add" onClick={() => addArr("projects", { title: "", tech: "", problem: "", built: "", result: "" })}>+ Add Project Architecture Card</button>
+          <button className="btn-add" onClick={() => addArr("projects", { title: "", tech: "", problem: "", built: "", result: "" })}>+ Add Project Architecture Card</button>
         </div>
 
         {/* 07 Education */}
@@ -662,7 +713,7 @@ function App() {
           <F label="Awards, Certifications, Extracurricular positions" value={form.achievements} onChange={v => set("achievements", v)} ph="Ranked Top 5% in Smart India Hackathon, Coursera Algorithm Certificate, Coding Club Core Member..." multi />
         </div>
 
-        <ATSPanel form={form} company={company} />
+        <ATSPanel form={form} selectedCompanies={selectedCompanies} />
 
         <div className="action-row">
           <button className="btn btn-accent" onClick={() => setGenerated(true)} disabled={!canGenerate}>
