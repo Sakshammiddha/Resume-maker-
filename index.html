@@ -1,735 +1,1300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>ResumeOS — ATS Builder</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ResumeOS v6 — ATS Resume Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080810;--s1:#0e0e1a;--s2:#13131f;--s3:#1a1a28;
+  --border:#1e1e2e;--border2:#2a2a3f;
+  --text:#e2e2f0;--sub:#5a5a7a;--muted:#1e1e30;
+  --accent:#C8F56A;--red:#FF6B6B;--orange:#FF9F43;--blue:#38BDF8;
+  --syne:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);-webkit-font-smoothing:antialiased;min-height:100vh;}
+.shell{max-width:880px;margin:0 auto;padding:48px 24px 100px;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:52px;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-mark{width:34px;height:34px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--syne);font-weight:800;font-size:16px;color:#06090a;}
+.logo-name{font-family:var(--syne);font-weight:800;font-size:20px;color:#fff;letter-spacing:-0.5px;}
+.logo-ver{font-size:9px;letter-spacing:3px;color:var(--sub);margin-top:1px;}
+.live-badge{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--sub);}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* HERO */
+.hero{margin-bottom:48px;}
+.eyebrow{font-size:9px;letter-spacing:5px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--accent);}
+.hero-h{font-family:var(--syne);font-size:clamp(28px,5vw,50px);font-weight:800;color:#fff;line-height:1.06;letter-spacing:-1.5px;margin-bottom:12px;}
+.hero-h em{font-style:italic;color:var(--accent);}
+.hero-p{font-size:12px;color:var(--sub);line-height:1.9;max-width:440px;}
+
+/* SECTION */
+.sec{margin-bottom:44px;}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.sec-num{font-size:9px;letter-spacing:2px;color:var(--accent);opacity:.8;}
+.sec-title{font-family:var(--syne);font-size:14px;font-weight:700;color:#fff;}
+.sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+.sec-desc{font-size:11px;color:var(--sub);margin-bottom:16px;line-height:1.7;}
+
+/* DOMAIN TABS */
+.domain-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
+.domain-tab{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:11px 24px;font-size:12px;color:var(--sub);cursor:pointer;font-family:var(--syne);font-weight:700;transition:all 0.15s;}
+.domain-tab.active,.domain-tab:hover{border-color:var(--accent);color:var(--accent);background:var(--s2);box-shadow:0 2px 10px rgba(200,245,106,0.06);}
+
+/* ROLE GRID */
+.role-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-bottom:4px;}
+.role-btn{background:var(--s2);border:1.5px solid var(--border);border-radius:12px;padding:20px 12px 16px;text-align:center;cursor:pointer;transition:all .18s;position:relative;user-select:none;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.role-btn:hover{transform:translateY(-2px);border-color:var(--border2);background:var(--s3);}
+.role-btn.active{border-color:var(--accent);background:rgba(200,245,106,.07);box-shadow:0 4px 15px rgba(200,245,106,0.05);}
+.role-icon{font-size:24px;display:block;}
+.role-name{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--text);}
+.role-btn.active .role-name{color:var(--accent);}
+.role-auto-note{font-size:10px;color:var(--sub);margin-top:12px;line-height:1.6;}
+.role-auto-note span{color:var(--accent);}
+
+/* COMPANY GRID */
+.co-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;}
+.co-btn{background:var(--s2);border:1.5px solid var(--border);border-radius:12px;padding:16px 8px 13px;text-align:center;cursor:pointer;transition:all .18s;user-select:none;}
+.co-btn:hover{transform:translateY(-2px);}
+.co-btn.active{border-color:var(--accent);background:rgba(200,245,106,.07);}
+.co-icon{font-size:20px;display:block;margin-bottom:5px;}
+.co-name{font-size:10px;font-weight:700;font-family:var(--syne);color:var(--text);}
+.co-btn.active .co-name{color:var(--accent);}
+.hint-box{margin-top:14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;display:none;}
+.hint-box.show{display:block;}
+.hint-label{font-size:8px;letter-spacing:3px;color:var(--sub);margin-bottom:8px;text-transform:uppercase;}
+.hint-text{font-size:11px;color:var(--text);line-height:1.7;margin-bottom:10px;}
+.kw-row{display:flex;flex-wrap:wrap;gap:6px;}
+.kw{background:var(--s3);border:1px solid var(--border2);border-radius:4px;padding:3px 9px;font-size:9px;}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+
+/* FIELDS */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.field label{font-size:8px;letter-spacing:3px;color:var(--sub);text-transform:uppercase;}
+.field input,.field textarea,.field select{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;resize:vertical;transition:border-color .15s;width:100%;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);}
+.field input::placeholder,.field textarea::placeholder{color:var(--sub);}
+.field select option{background:var(--s2);color:var(--text);}
+
+/* SKILLS CATEGORY TABLE */
+.skills-cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:12px;}
+.skills-cat-block{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.skills-cat-label{font-size:8px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:8px;}
+.skills-cat-block input{background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:11px;font-family:var(--mono);outline:none;width:100%;}
+.skills-cat-block input:focus{border-color:var(--accent);}
+.skills-cat-block input::placeholder{color:var(--sub);}
+.skills-mode-toggle{display:flex;gap:8px;margin-bottom:16px;}
+.mode-btn{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:7px 16px;font-size:10px;font-family:var(--syne);font-weight:700;color:var(--sub);cursor:pointer;transition:all .15s;}
+.mode-btn.active{border-color:var(--accent);color:var(--accent);}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:26px;position:relative;margin-bottom:16px;}
+.card-badge{position:absolute;top:-9px;left:18px;background:var(--bg);padding:0 10px;font-size:8px;letter-spacing:3px;color:var(--accent);}
+.card-remove{position:absolute;top:14px;right:14px;background:transparent;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:10px;color:var(--sub);cursor:pointer;font-family:var(--mono);transition:all .15s;}
+.card-remove:hover{border-color:var(--red);color:var(--red);}
+
+/* CHIP ROW (flat mode) */
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.chip{background:var(--s3);border:1px solid var(--border2);border-radius:5px;padding:4px 10px;font-size:10px;color:var(--text);}
+
+/* BOLD HINT */
+.bold-hint{font-size:10px;color:var(--sub);margin-top:6px;line-height:1.6;}
+.bold-hint span{color:var(--accent);}
+
+/* ATS PANEL */
+.ats-panel{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;margin-top:36px;}
+.ats-header{font-size:8px;letter-spacing:4px;color:var(--sub);margin-bottom:20px;text-transform:uppercase;}
+.ats-top{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:24px;}
+.ats-ring-wrap{position:relative;width:88px;height:88px;flex-shrink:0;}
+.ats-ring-wrap svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);}
+.ats-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ats-score{font-family:var(--syne);font-size:28px;font-weight:800;line-height:1;}
+.ats-of{font-size:8px;letter-spacing:2px;color:var(--sub);margin-top:2px;}
+.ats-meta{flex:1;min-width:200px;}
+.ats-grade-row{display:flex;justify-content:space-between;font-size:10px;margin-bottom:8px;}
+.ats-bar-bg{height:5px;background:var(--muted);border-radius:99px;overflow:hidden;margin-bottom:10px;}
+.ats-bar-fill{height:100%;border-radius:99px;transition:width .4s ease;}
+.ats-note{font-size:11px;color:var(--sub);line-height:1.6;}
+.ats-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;}
+.ats-col-head{font-size:8px;letter-spacing:3px;font-weight:700;text-transform:uppercase;margin-bottom:10px;}
+.ats-item{display:flex;align-items:flex-start;gap:8px;font-size:11px;margin-bottom:7px;line-height:1.5;}
+
+/* BUTTONS */
+.btn{border:none;border-radius:10px;padding:13px 28px;font-weight:700;font-family:var(--syne);font-size:12px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:8px;}
+.btn-primary{background:var(--accent);color:#06090a;}
+.btn-primary:hover{background:#d4ff7a;transform:translateY(-1px);}
+.btn-primary:disabled{background:var(--muted);color:var(--sub);cursor:not-allowed;transform:none;}
+.btn-ghost{background:transparent;color:var(--sub);border:1px solid var(--border);}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2);}
+.btn-add{width:100%;background:transparent;border:1.5px dashed var(--border);border-radius:10px;padding:14px;color:var(--sub);font-family:var(--mono);font-size:11px;cursor:pointer;margin-top:4px;transition:all .15s;}
+.btn-add:hover{border-color:var(--accent);color:var(--accent);}
+.action-row{display:flex;gap:12px;margin-top:36px;align-items:center;flex-wrap:wrap;}
+.req-note{font-size:10px;color:var(--red);}
+
+/* TEMPLATE SWITCHER */
+.tmpl-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;justify-content:center;}
+.tmpl-btn{background:var(--s2);border:1.5px solid var(--border);border-radius:8px;padding:10px 18px;font-size:11px;font-family:var(--syne);font-weight:600;color:var(--sub);cursor:pointer;transition:all .15s;}
+.tmpl-btn.active,.tmpl-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(200,245,106,.06);}
+
+/* VIEWS */
+#editor-view{display:block;}
+#preview-view{display:none;}
+.out-label{text-align:center;font-size:9px;letter-spacing:5px;color:var(--accent);text-transform:uppercase;margin-bottom:16px;}
+.out-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
+.print-hint{text-align:center;font-size:10px;color:var(--sub);margin-top:16px;}
+
+/* ── RESUME OUTPUT ── */
+.resume{background:#fff;color:#111;font-family:'Segoe UI',sans-serif;padding:50px 54px;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.3);line-height:1.5;text-align:left;}
+.rv-head{border-bottom:2.5px solid #111;padding-bottom:10px;margin-bottom:16px;}
+.rv-name{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:#0a0a0a;line-height:1;letter-spacing:-1px;}
+.rv-role{font-size:12px;color:#1f2937;margin-top:6px;margin-bottom:6px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
+.rv-contacts{display:flex;flex-wrap:wrap;gap:0 14px;font-size:11px;color:#1f2937;font-family:'JetBrains Mono',monospace;}
+.rv-contacts a{color:#111827;text-decoration:underline;text-decoration-color:#5a5a7a;}
+.rv-sec{margin-bottom:18px;}
+.rv-sec-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;border-bottom:1.5px solid #111;padding-bottom:3px;margin-bottom:10px;}
+.rv-summary{font-size:11px;color:#111827;line-height:1.55;text-align:justify;}
+
+/* CATEGORIZED SKILLS */
+.rv-skills-cat{margin-bottom:4px;}
+.rv-skills-cat-row{font-size:11px;color:#111827;line-height:1.6;margin-bottom:3px;}
+.rv-skills-cat-label{font-weight:700;color:#0a0a0a;}
+
+/* FLAT SKILLS */
+.rv-skills{display:flex;flex-wrap:wrap;gap:6px;}
+.rv-skill{background:#f3f4f6;border:1px solid #d1d5db;color:#0a0a0a;font-size:10.5px;padding:3px 9px;border-radius:4px;font-weight:600;}
+
+.rv-exp-item{margin-bottom:14px;}
+.rv-exp-top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px;}
+.rv-exp-role{font-size:11px;color:#1f2937;font-style:italic;margin-top:1px;margin-bottom:5px;font-weight:500;}
+.rv-exp-date{font-size:11px;color:#374151;font-weight:600;font-family:'JetBrains Mono',monospace;}
+.rv-exp-co{font-size:12px;font-weight:700;color:#0a0a0a;}
+.rv-exp-type{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;margin-left:8px;font-family:'JetBrains Mono',monospace;letter-spacing:1px;vertical-align:middle;}
+.rv-exp-type.fulltime{background:#dcfce7;color:#166534;}
+.rv-exp-type.intern{background:#dbeafe;color:#1e40af;}
+.rv-exp-type.contract{background:#fef9c3;color:#854d0e;}
+.rv-bullet-ul{margin:0;padding-left:14px;list-style-type:disc;}
+.rv-bullet-li{font-size:11px;color:#111827;line-height:1.5;margin-bottom:3px;text-align:justify;}
+.rv-proj-item{margin-bottom:10px;}
+.rv-proj-top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px;}
+.rv-proj-name{font-size:12px;font-weight:700;color:#0a0a0a;}
+.rv-proj-tech{font-size:10px;color:#1f2937;font-family:'JetBrains Mono',monospace;background:#e5e7eb;padding:1px 6px;border-radius:3px;font-weight:600;}
+.rv-proj-desc{font-size:11px;color:#111827;line-height:1.45;margin-top:4px;text-align:justify;padding-left:2px;}
+.rv-edu-item{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:6px;font-size:11.5px;}
+.rv-edu-deg{color:#0a0a0a;font-weight:700;}
+.rv-edu-yr{color:#333;font-weight:600;font-family:'JetBrains Mono',monospace;}
+.rv-edu-inst{color:#222;font-style:italic;}
+.rv-achieve{font-size:11px;color:#111827;line-height:1.6;text-align:justify;}
+.rv-achieve ul{padding-left:14px;list-style-type:disc;}
+.rv-achieve ul li{margin-bottom:3px;}
+
+/* Modern Technical 2-col */
+.resume.tmpl-tech{display:grid;grid-template-columns:220px 1fr;gap:0;padding:0;}
+.tmpl-tech .rv-sidebar{background:#1e293b;padding:32px 20px;border-radius:0 0 0 8px;}
+.tmpl-tech .rv-main{padding:32px 32px;background:#fff;border-radius:0 0 8px 0;}
+.tmpl-tech .rv-full{grid-column:1/-1;background:#1e293b;padding:28px 32px;border-radius:8px 8px 0 0;}
+.tmpl-tech .rv-full .rv-name{color:#fff;}
+.tmpl-tech .rv-full .rv-role{color:#cbd5e1;}
+.tmpl-tech .rv-full .rv-contacts{color:#cbd5e1;}
+.tmpl-tech .rv-full .rv-contacts a{color:#C8F56A;}
+.tmpl-tech .rv-full .rv-head{border-bottom-color:#334155;}
+.tmpl-tech .rv-sidebar .rv-sec-title{color:#C8F56A;border-bottom-color:#334155;font-size:10px;}
+.tmpl-tech .rv-sidebar .rv-skill{background:#334155;border-color:#475569;color:#f1f5f9;font-size:10px;}
+.tmpl-tech .rv-sidebar .rv-summary{color:#e2e8f0;font-size:11px;}
+.tmpl-tech .rv-sidebar .rv-edu-deg{color:#f1f5f9;}
+.tmpl-tech .rv-sidebar .rv-edu-yr{color:#cbd5e1;}
+.tmpl-tech .rv-sidebar .rv-edu-inst{color:#cbd5e1;}
+.tmpl-tech .rv-sidebar .rv-skills-cat-label{color:#C8F56A;}
+.tmpl-tech .rv-sidebar .rv-skills-cat-row{color:#e2e8f0;}
+
+@media print{
+  @page{margin:0;}
+  body{background:#fff!important;padding:30px!important;}
+  body *{visibility:hidden!important;}
+  .resume,.resume *{visibility:visible!important;}
+  .resume{position:absolute!important;top:0!important;left:0!important;width:100%!important;box-shadow:none!important;border-radius:0!important;}
+  .resume.tmpl-tech{padding:0!important;}
+}
+@media(max-width:640px){
+  .shell{padding:24px 16px 80px;}
+  .resume{padding:28px 20px!important;}
+  .resume.tmpl-tech{grid-template-columns:1fr!important;}
+  .tmpl-tech .rv-sidebar{border-radius:0!important;}
+  .tmpl-tech .rv-full{border-radius:8px 8px 0 0!important;}
+}
+.ai-score-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+.ai-big-score{font-family:var(--syne);font-size:48px;font-weight:800;line-height:1;}
+.ai-score-meta{flex:1;}
+.ai-score-label{font-size:13px;font-weight:700;font-family:var(--syne);margin-bottom:4px;}
+.ai-score-sub{font-size:10px;color:var(--sub);line-height:1.6;}
+.ai-bar-bg{height:6px;background:var(--muted);border-radius:99px;overflow:hidden;margin-top:8px;}
+.ai-bar-fill{height:100%;border-radius:99px;transition:width .8s ease;}
+.ai-sections{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px;}
+.ai-sec-block{background:var(--s3);border:1px solid var(--border2);border-radius:10px;padding:14px;}
+.ai-sec-head{font-size:8px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:10px;}
+.ai-point{font-size:11px;line-height:1.55;margin-bottom:6px;display:flex;gap:7px;}
+.ai-point-icon{flex-shrink:0;margin-top:1px;}
+.ai-matched-kw{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.ai-kw{font-size:9px;padding:3px 8px;border-radius:4px;font-weight:600;}
+.ai-kw.match{background:rgba(200,245,106,.15);color:var(--accent);border:1px solid rgba(200,245,106,.3);}
+.ai-kw.miss{background:rgba(255,107,107,.1);color:var(--red);border:1px solid rgba(255,107,107,.2);}
+.ats-mode-toggle{display:flex;gap:8px;margin-bottom:16px;}
+.ats-mode-btn{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:7px 16px;font-size:10px;font-family:var(--syne);font-weight:700;color:var(--sub);cursor:pointer;transition:all .15s;}
+.ats-mode-btn.active{border-color:var(--accent);color:var(--accent);}
+</style>
 </head>
 <body>
 
-<div id="root"></div>
+<div id="editor-view">
+<div class="shell">
 
-<script type="text/babel">
-const { useState } = React;
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">R</div>
+      <div><div class="logo-name">ResumeOS</div><div class="logo-ver">v6 · ATS Builder</div></div>
+    </div>
+    <div class="live-badge"><div class="pulse"></div>ATS Live</div>
+  </div>
 
-// 1. COMPANY & STUDENT PROFILES DATA
-const COMPANY_PROFILES = {
-  Student: {
-    color: "#C8F56A", emoji: "🎓",
-    keywords: ["data structures", "algorithms", "academic milestone", "hackathon", "btech", "problem solving", "foundational frameworks"],
-    tone: "Focus on academic excellence, core computer science concepts, hands-on lab milestones, and personal open-source builds. Prove you are a self-starter who learns fast.",
-    boost: ["implemented optimal data structures", "built personal prototype", "collaborated on academic team project", "excelled in core coursework"]
+  <div class="hero">
+    <div class="eyebrow">Workspace Editor</div>
+    <div class="hero-h">Build a resume<br/>that <em>gets hired.</em></div>
+    <div class="hero-p">Role-specific skill autofill, company keyword injection, live ATS scoring, categorized skills, and 2 professional layouts.</div>
+  </div>
+
+  <!-- DOMAIN -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-num">★</span><span class="sec-title">Career Domain & Role</span><div class="sec-line"></div></div>
+    <p class="sec-desc">Pick your domain first, then select your role. Skills and keywords fill automatically.</p>
+    <div class="domain-row">
+      <div class="domain-tab active" id="dt-tech" onclick="switchDomain('tech')">⚙️ &nbsp;Tech & Engineering</div>
+      <div class="domain-tab" id="dt-law" onclick="switchDomain('law')">⚖️ &nbsp;Law & Legal</div>
+    </div>
+    <div class="role-grid" id="role-grid"></div>
+    <div class="role-auto-note" id="role-auto-note"></div>
+  </div>
+
+  <!-- BASIC INFO -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-num">01</span><span class="sec-title">Basic Info</span><div class="sec-line"></div></div>
+    <div class="g2">
+      <div class="field"><label>Full Name *</label><input id="f-name" placeholder="Your Full Name" oninput="updateATS()"/></div>
+      <div class="field"><label>Target Role *</label><input id="f-role" placeholder="Software Engineer / Corporate Counsel" oninput="updateATS()"/></div>
+    </div>
+    <div class="g3">
+      <div class="field"><label>Email</label><input id="f-email" placeholder="you@email.com" oninput="updateATS()"/></div>
+      <div class="field"><label>Phone</label><input id="f-phone" placeholder="+91 98765 43210" oninput="updateATS()"/></div>
+      <div class="field"><label>Location</label><input id="f-location" placeholder="City, State" oninput="updateATS()"/></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>LinkedIn URL</label><input id="f-linkedin" placeholder="linkedin.com/in/yourhandle" oninput="updateATS()"/></div>
+      <div class="field"><label id="lbl-portfolio">GitHub / Portfolio</label><input id="f-github" placeholder="github.com/username" oninput="updateATS()"/></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label id="lbl-extra-link">LeetCode / GFG / Bar Profile</label><input id="f-extralink" placeholder="leetcode.com/u/username" oninput="updateATS()"/></div>
+    </div>
+  </div>
+
+  <!-- TARGET COMPANIES -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-num">02</span><span class="sec-title">Target Company / Firm Profiles</span><div class="sec-line"></div></div>
+    <p class="sec-desc" id="co-sec-desc">Select targets — their keywords inject into your ATS score automatically.</p>
+    <div class="co-grid" id="co-grid"></div>
+    <div class="hint-box" id="co-hint">
+      <div class="hint-label">Active Keywords</div>
+      <div class="hint-text" id="co-hint-text"></div>
+      <div class="kw-row" id="co-kw-row"></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-num">03</span><span class="sec-title">Professional Summary</span><div class="sec-line"></div></div>
+    <div class="field">
+      <label>Leave blank to auto-generate from role + company</label>
+      <textarea id="f-summary" placeholder="Brief 2–3 sentence overview..." rows="4" oninput="updateATS()"></textarea>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-num">04</span><span class="sec-title">Skills</span><div class="sec-line"></div></div>
+    <p class="sec-desc">Use <b>Categorized</b> mode for a structured skills section (recommended for engineering roles), or <b>Flat</b> for simple chips.</p>
+    <div class="skills-mode-toggle">
+      <button class="mode-btn active" id="mode-cat" onclick="switchSkillMode('categorized')">Categorized</button>
+      <button class="mode-btn" id="mode-flat" onclick="switchSkillMode('flat')">Flat / Chips</button>
+    </div>
+
+    <!-- CATEGORIZED MODE -->
+    <div id="skills-cat-panel">
+      <div class="skills-cat-grid">
+        <div class="skills-cat-block">
+          <div class="skills-cat-label" id="cat-label-1">Languages</div>
+          <input id="cat-1" placeholder="C++, Python, JavaScript..." oninput="updateATS()"/>
+        </div>
+        <div class="skills-cat-block">
+          <div class="skills-cat-label" id="cat-label-2">Tools & Databases</div>
+          <input id="cat-2" placeholder="Git, MySQL, Linux, VS Code..." oninput="updateATS()"/>
+        </div>
+        <div class="skills-cat-block">
+          <div class="skills-cat-label" id="cat-label-3">Frameworks & Libraries</div>
+          <input id="cat-3" placeholder="Node.js, React, OpenCV..." oninput="updateATS()"/>
+        </div>
+        <div class="skills-cat-block">
+          <div class="skills-cat-label" id="cat-label-4">Others</div>
+          <input id="cat-4" placeholder="System Design, DSA, OOP, AWS..." oninput="updateATS()"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLAT MODE -->
+    <div id="skills-flat-panel" style="display:none">
+      <div class="field">
+        <label>Comma-separated — auto-filled when you pick a role above</label>
+        <input id="f-skills" placeholder="React, Node.js, Python..." oninput="renderChips();updateATS()"/>
+      </div>
+      <div class="chip-row" id="skill-chips"></div>
+    </div>
+  </div>
+
+  <!-- EDUCATION -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-num">05</span><span class="sec-title">Education</span><div class="sec-line"></div></div>
+    <p class="sec-desc">Add separate blocks for University/College, Class 12th, and Class 10th.</p>
+    <div id="edu-list"></div>
+    <button class="btn-add" onclick="addEdu()">+ Add Education Block</button>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-num">06</span><span class="sec-title">Work Experience / Internships</span><div class="sec-line"></div></div>
+    <div id="exp-list"></div>
+    <button class="btn-add" onclick="addExp()">+ Add Experience</button>
+  </div>
+
+  <!-- PROJECTS -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-num">07</span><span class="sec-title" id="proj-sec-title">Projects</span><div class="sec-line"></div></div>
+    <p class="sec-desc" id="proj-sec-desc">Add technical projects — personal builds, open source, or hackathon entries.</p>
+    <div id="proj-list"></div>
+    <button class="btn-add" id="proj-add-btn" onclick="addProj()">+ Add Project</button>
+  </div>
+
+  <!-- ACHIEVEMENTS -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-num">08</span><span class="sec-title">Achievements & Certifications</span><div class="sec-line"></div></div>
+    <div class="field">
+      <label id="lbl-achieve">Awards, hackathon rankings, certifications, extracurriculars — one per line</label>
+      <textarea id="f-achieve" placeholder="Received Best Performer Award — Q3 2024&#10;Ranked Top 50 globally in XYZ Hackathon&#10;Solved 400+ problems on LeetCode and GFG" rows="5" oninput="updateATS()"></textarea>
+    </div>
+    <div class="bold-hint">Tip: Wrap key terms in <span>**double asterisks**</span> to bold them in the output — e.g. <span>**25%**</span>, <span>**top 10%**</span></div>
+  </div>
+
+  <!-- ATS PANEL -->
+  <div class="ats-panel">
+    <div class="ats-header">Live ATS Score</div>
+
+    <div id="ats-basic-panel">
+      <div class="ats-top">
+        <div class="ats-ring-wrap">
+          <svg viewBox="0 0 88 88">
+            <circle cx="44" cy="44" r="36" fill="none" stroke="#1e1e2e" stroke-width="5"/>
+            <circle id="ats-circle" cx="44" cy="44" r="36" fill="none" stroke="#C8F56A" stroke-width="5"
+              stroke-dasharray="226.2" stroke-dashoffset="226.2" stroke-linecap="round"/>
+          </svg>
+          <div class="ats-inner">
+            <div class="ats-score" id="ats-score">0</div>
+            <div class="ats-of">/100</div>
+          </div>
+        </div>
+        <div class="ats-meta">
+          <div class="ats-grade-row">
+            <span id="ats-label" style="font-weight:700">Incomplete</span>
+            <span id="ats-grade">Grade D</span>
+          </div>
+          <div class="ats-bar-bg"><div class="ats-bar-fill" id="ats-bar" style="width:0%"></div></div>
+          <div class="ats-note" id="ats-note">Select a role and company to begin scoring.</div>
+        </div>
+      </div>
+      <div class="ats-cols">
+        <div>
+          <div class="ats-col-head" style="color:var(--red)">Fix These</div>
+          <div id="ats-issues"></div>
+        </div>
+        <div>
+          <div class="ats-col-head" style="color:var(--accent)">Strengths</div>
+          <div id="ats-wins"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="gen-btn" onclick="generateResume()" disabled>Generate Resume →</button>
+    <span class="req-note" id="req-note">* Name required</span>
+  </div>
+
+</div>
+</div>
+
+<!-- PREVIEW VIEW -->
+<div id="preview-view">
+<div class="shell">
+  <div class="out-label" id="out-label">Resume Output</div>
+  <div class="out-controls">
+    <button class="btn btn-ghost" onclick="showEditor()">← Back to Editor</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear All</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
+  </div>
+  <div class="tmpl-row">
+    <button class="tmpl-btn active" id="tb-classic" onclick="switchTemplate('classic')">Classic Corporate</button>
+    <button class="tmpl-btn" id="tb-tech" onclick="switchTemplate('tech')">Modern Technical</button>
+  </div>
+  <div id="resume-output"></div>
+  <div class="print-hint">Ctrl+P → Save as PDF for cleanest export</div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════
+// DOMAIN CONFIG
+// ══════════════════════════════════
+const DOMAIN_CONFIG = {
+  tech: {
+    portfolioLabel:"GitHub / Portfolio",
+    portfolioPH:   "github.com/username",
+    extraLinkLabel:"LeetCode / GFG Profile",
+    extraLinkPH:   "leetcode.com/u/username or geeksforgeeks.org/user/username",
+    expPlaceholder:"Optimized API response time by **40%** using caching strategies\nBuilt automated CI/CD pipeline reducing deployment time by **60%**",
+    expCoLabel:    "Company / Organization",
+    expRoleLabel:  "Your Role / Title",
+    expRolePH:     "Software Engineer Intern",
+    sec07Title:    "Projects",
+    sec07Desc:     "Add technical projects — personal builds, open source contributions, or hackathon entries. Use **bold** for tech names and numbers.",
+    addProjBtn:    "+ Add Project",
+    projCardBadge: "PROJECT",
+    projTitleLabel:"Project Name",
+    projTitlePH:   "Price Tracker App / News Aggregator / Chat Application",
+    projTechLabel: "Tech Stack",
+    projTechPH:    "React JS, Node.js, API",
+    projDescLabel: "What you built and the impact — use **bold** for key terms",
+    projDescPH:    "Built a real-time **price tracking** app using **React.js** and **Chart.js** with live API integration",
+    achieveLabel:  "Awards, hackathon rankings, certifications — one per line. Use **bold** for highlights.",
+    achievePH:     "Received **Best Performer Award** — Q3 2024\nRanked **Top 50 globally** in XYZ Hackathon\nSolved **400+ problems** on LeetCode and GFG",
+    resumeProjTitle:"Personal Projects",
+    resumeExpTitle: "Experience",
+    catLabels:     ["Languages","Tools & Databases","Frameworks & Libraries","Others"],
+    catPlaceholders:["C++, Python, JavaScript, Java","Git, MySQL, Linux, VS Code, REST API","Node.js, React, OpenCV, Springboot","DSA, System Design, OOP, AWS, Machine Learning"],
+    atsWin:        (n) => `${n} projects listed`,
+    atsNeed:       "Add at least 2 technical projects"
   },
-  Google: {
-    color: "#4285F4", emoji: "🌐",
-    keywords: ["scalable systems", "large-scale", "distributed", "machine learning", "latency", "system design", "optimization"],
-    tone: "Emphasize scale, impact, and data. Google loves metrics, system design, and algorithms.",
-    boost: ["engineered scalable", "drove measurable impact", "optimized for performance", "architected core infrastructure"]
-  },
-  Amazon: {
-    color: "#FF9900", emoji: "📦",
-    keywords: ["ownership", "customer obsession", "delivery", "scalable", "cost reduction", "operational excellence", "velocity"],
-    tone: "Use Amazon Leadership Principles language. Emphasize ownership, delivering results, and working backwards.",
-    boost: ["took full ownership", "delivered end-to-end", "reduced operational costs", "scaled customer-facing services"]
-  },
-  Microsoft: {
-    color: "#00A4EF", emoji: "💻",
-    keywords: ["cloud", "Azure", "collaboration", "enterprise", "security", "developer tools", "scalability"],
-    tone: "Highlight cloud experience, collaboration, and enterprise impact. Microsoft values robust architecture.",
-    boost: ["built enterprise-grade", "leveraged cloud infrastructure", "improved developer efficiency", "ensured security compliance"]
-  },
-  Meta: {
-    color: "#0082FB", emoji: "♾️",
-    keywords: ["social impact", "billions of users", "move fast", "A/B testing", "experimentation", "product development", "growth"],
-    tone: "Speed and scale matter. Meta wants people who move fast, experiment, and obsess over user-facing engineering metrics.",
-    boost: ["shipped rapidly", "ran A/B experiments", "improved ranking quality", "scaled feature infrastructure"]
-  },
-  Apple: {
-    color: "#555555", emoji: "🍎",
-    keywords: ["detail-oriented", "polish", "user experience", "hardware-software", "perfection", "accessibility", "privacy"],
-    tone: "Apple values perfection and polish. Emphasize attention to detail, UX engineering, and seamless framework assembly.",
-    boost: ["crafted polished experiences", "optimized performance", "ensured seamless integration", "designed with pixel-perfection"]
-  },
-  Netflix: {
-    color: "#E50914", emoji: "🍿",
-    keywords: ["streaming", "microservices", "resilience", "chaos engineering", "freedom", "responsibility", "high performance"],
-    tone: "Netflix values high performers with great judgment. Show impact, autonomy, and capacity to build highly stable architectures.",
-    boost: ["drove high-impact outcomes", "built resilient systems", "exercised strong engineering autonomy", "minimized fault windows"]
-  },
-  Startup: {
-    color: "#10B981", emoji: "🚀",
-    keywords: ["full-stack", "fast-paced", "self-starter", "cross-functional", "shipping", "mvp", "growth hack"],
-    tone: "Startups want generalists who ship fast. Show breadth, speed, and ability to turn concepts into software overnight.",
-    boost: ["built MVP from scratch", "wore multiple hats", "shipped in record time", "accelerated product iterations"]
+  law: {
+    portfolioLabel:"Bar Council / Portfolio Link",
+    portfolioPH:   "bar-council-reg / legal-portfolio link",
+    extraLinkLabel:"Publications / Research Profile",
+    extraLinkPH:   "ssrn.com/author/yourname or ijlr publication link",
+    expPlaceholder:"Drafted advisory memo reducing client regulatory risk by **15%**\nResearched case law for senior counsel on landmark IP dispute",
+    expCoLabel:    "Law Firm / Organization / Chamber",
+    expRoleLabel:  "Your Designation / Role",
+    expRolePH:     "Junior Associate / Legal Intern / Articled Clerk",
+    sec07Title:    "Moot Courts & Legal Research",
+    sec07Desc:     "Add moot court competitions, research papers, PILs. Use **bold** for laws and awards.",
+    addProjBtn:    "+ Add Moot Court / Research",
+    projCardBadge: "MOOT",
+    projTitleLabel:"Competition / Research Title",
+    projTitlePH:   "National Moot Court Competition / PIL Draft",
+    projTechLabel: "Laws / Acts Applied",
+    projTechPH:    "Companies Act 2013, CrPC, Art. 21",
+    projDescLabel: "Your role, arguments and result — use **bold** for awards",
+    projDescPH:    "Argued petitioner side on **Article 21** grounds — reached **national quarter-finals**",
+    achieveLabel:  "Awards, moot recognitions, publications — one per line. Use **bold** for highlights.",
+    achievePH:     "**Best Speaker Award** — NLS Moot 2024\nAIBE Qualified\nPublished in **IJLR** — Vol 12",
+    resumeProjTitle:"Moot Courts & Legal Research",
+    resumeExpTitle: "Legal Experience & Internships",
+    catLabels:     ["Core Practice Areas","Laws & Statutes","Tools & Software","Others"],
+    catPlaceholders:["Contract Drafting, Litigation, Due Diligence","Companies Act 2013, IPC, CrPC, Art.21","MS Word, Westlaw, Manupatra, SCC Online","Legal Research, Client Counseling, Moot Advocacy"],
+    atsWin:        (n) => `${n} moot courts / research entries listed`,
+    atsNeed:       "Add at least 2 moot courts or research entries"
   }
 };
 
-const STRONG_VERBS = ["Engineered", "Architected", "Spearheaded", "Orchestrated", "Designed", "Optimized", "Scaled", "Automated", "Deployed", "Implemented", "Developed"];
-const WEAK_VERBS = ["worked on", "helped with", "was responsible for", "assisted", "participated in"];
+// ══════════════════════════════════
+// ROLES
+// ══════════════════════════════════
+const ROLES = {
+  frontend:    {domain:"tech", icon:"💻", name:"Frontend",    title:"Frontend Engineer",           skills:"React.js, Next.js, TypeScript, JavaScript (ES6+), HTML5, CSS3, Tailwind CSS, Redux, Jest, Webpack", keywords:["responsive design","core web vitals","state management","component architecture"], summary:"Front-End Engineer with strong command of modern web development technologies. Skilled in building modular, high-performance UI components with a focus on Core Web Vitals and responsive design."},
+  backend:     {domain:"tech", icon:"⚙️", name:"Backend",     title:"Backend Engineer",            skills:"Node.js, Python, Java, C++, REST APIs, GraphQL, PostgreSQL, Redis, MongoDB, Docker, Multithreading",  keywords:["api design","database optimization","microservices","server-side architecture"],  summary:"Backend Engineer with expertise in distributed systems, high-throughput APIs, and database optimization across SQL and NoSQL stacks."},
+  fullstack:   {domain:"tech", icon:"🔀", name:"Full Stack",  title:"Full Stack Engineer",         skills:"React.js, Node.js, TypeScript, Next.js, Express, PostgreSQL, MongoDB, AWS, Docker, REST APIs",        keywords:["end-to-end development","full-cycle deployment","schema design","monorepo"],       summary:"Full Stack Engineer specializing in delivering complete, production-ready web applications from database schema through to polished user interfaces."},
+  devops:      {domain:"tech", icon:"🔧", name:"DevOps",      title:"DevOps Engineer",             skills:"Docker, Kubernetes, AWS, Terraform, GitHub Actions, Linux, Bash, Nginx, Prometheus, Grafana",         keywords:["CI/CD","infrastructure as code","container orchestration","monitoring"],           summary:"DevOps Engineer experienced in building automated CI/CD pipelines, container orchestration, and cloud-native deployment systems."},
+  datascience: {domain:"tech", icon:"📊", name:"Data Science",title:"Data Scientist",              skills:"Python, R, SQL, Pandas, NumPy, Scikit-learn, Tableau, Power BI, Statistical Modeling, Spark",        keywords:["predictive modeling","ETL pipelines","data analysis","A/B testing"],               summary:"Data Scientist skilled in building end-to-end ETL pipelines, predictive models, and dashboards that support strategic decisions."},
+  ml_ai:       {domain:"tech", icon:"🤖", name:"ML / AI",     title:"ML / AI Engineer",            skills:"Python, PyTorch, TensorFlow, Hugging Face, OpenCV, Computer Vision, LLMs, MLOps, CUDA, Scikit-learn", keywords:["model training","neural networks","NLP","computer vision","fine-tuning"],          summary:"Machine Learning Engineer specializing in training and deploying CV and NLP models, with hands-on experience in LLM fine-tuning and MLOps pipelines."},
+  mobile:      {domain:"tech", icon:"📱", name:"Mobile",      title:"Mobile Application Engineer", skills:"Flutter, React Native, Swift, Kotlin, iOS SDK, Android Jetpack, Firebase, Expo, REST APIs",           keywords:["cross-platform","native performance","offline sync","mobile UI"],                   summary:"Mobile Engineer crafting high-performance, pixel-perfect applications across iOS and Android using Flutter and React Native."},
+  qa:          {domain:"tech", icon:"🧪", name:"QA / Testing",title:"QA / Automation Engineer",   skills:"Selenium, Cypress, Jest, Postman, Appium, PyTest, JIRA, Load Testing, Regression Suites, CI Pipeline", keywords:["test automation","regression testing","API testing","quality assurance"],          summary:"QA Engineer focused on building robust automated regression and integration test suites that reduce production defects."},
+  corplaw:     {domain:"law",  icon:"⚖️", name:"Corporate Law",  title:"Corporate Legal Associate", skills:"Contract Drafting, Due Diligence, M&A Advisory, Companies Act 2013, Regulatory Compliance, Risk Assessment, Legal Research, Joint Ventures", keywords:["legal risk reduction","contract negotiation","statutory compliance","due diligence"], summary:"Corporate Legal Associate specializing in contract lifecycle management, transactional due diligence, and corporate compliance frameworks."},
+  litigation:  {domain:"law",  icon:"🏛️", name:"Litigation",     title:"Litigation Associate",      skills:"Legal Drafting, Case Briefing, Courtroom Advocacy, Civil Procedure, Criminal Law, Client Counseling, Brief Preparation, Evidentiary Analysis", keywords:["brief preparation","judicial presentation","appellate strategy","dispute resolution"], summary:"Litigation Associate with extensive courtroom exposure, comprehensive statutory briefing, and strategic dispute resolution capabilities."},
+  iplaw:       {domain:"law",  icon:"🔒", name:"IP Law",          title:"IP & Technology Lawyer",    skills:"Trademark Filing, Patent Drafting, Copyright Enforcement, IP Valuation, IP Litigation, FTO, Licensing Agreements, Technology Law", keywords:["trademark prosecution","patent search","infringement assessment","licensing"],       summary:"IP Lawyer focusing on trademark prosecution, technology transfer licensing, and safeguarding patent portfolios across jurisdictions."}
+};
 
-// 2. ATS EVALUATION ENGINE
-function calcATS(form, selectedCompanies) {
-  let score = 0;
-  const issues = [];
-  const wins = [];
-
-  if (form.name) score += 3; else issues.push("Add your full name");
-  if (form.email) score += 4; else issues.push("Add email address");
-  if (form.phone) score += 4; else issues.push("Add phone number");
-  if (form.location) score += 2; else issues.push("Add city/location");
-  if (form.linkedin) { score += 2; wins.push("LinkedIn URL present"); }
-  if (form.role) score += 5; else issues.push("Add target role/title");
-  
-  if (form.summary && form.summary.length > 40) { score += 5; wins.push("Summary looks good"); }
-
-  const skills = form.skills.split(",").map(s => s.trim()).filter(Boolean);
-  if (skills.length >= 6) { score += 10; wins.push(`${skills.length} skills listed`); }
-  else { issues.push("Add more skills (aim for 6+)"); }
-
-  const exps = form.experience.filter(e => e.company || e.role);
-  const projs = form.projects.filter(p => p.title);
-
-  // Relax work experience rule if Student is part of selection profile
-  if (selectedCompanies.includes("Student")) {
-    if (exps.length > 0 || projs.length > 0) {
-      score += 15;
-      wins.push("Academic projects or training records found");
-    } else {
-      issues.push("Add at least one academic project or training detail");
-    }
-  } else {
-    if (exps.length > 0) {
-      score += 15;
-      wins.push("Experience details present");
-    } else {
-      issues.push("Add at least one work/internship experience item");
-    }
+// ══════════════════════════════════
+// COMPANIES
+// ══════════════════════════════════
+const COMPANIES = {
+  tech: {
+    Student:   {icon:"🎓", color:"#C8F56A", keywords:["data structures","algorithms","problem solving","academic project","open source"],       tone:"Highlight academic achievements, personal builds, and learning velocity."},
+    Google:    {icon:"🌐", color:"#4285F4", keywords:["scalable systems","distributed","system design","large-scale","latency","machine learning"],tone:"Scale, data, and impact. Use measurable numbers and algorithmic thinking."},
+    Amazon:    {icon:"📦", color:"#FF9900", keywords:["ownership","customer obsession","operational excellence","delivery","cost reduction"],     tone:"Leadership Principles — own it, deliver it, measure it."},
+    Microsoft: {icon:"💻", color:"#00A4EF", keywords:["Azure","cloud","enterprise","security","collaboration","developer tools"],                 tone:"Enterprise reliability and cloud depth."},
+    Meta:      {icon:"♾️", color:"#0082FB", keywords:["A/B testing","experimentation","move fast","growth","product velocity"],                  tone:"Ship fast, experiment, iterate."},
+    Apple:     {icon:"🍎", color:"#888888", keywords:["polish","user experience","accessibility","privacy","performance"],                        tone:"Precision and craft. Engineers who sweat every detail."},
+    Netflix:   {icon:"🎬", color:"#E50914", keywords:["microservices","resilience","high availability","autonomy","streaming"],                  tone:"High performers with great judgment and autonomy."},
+    Startup:   {icon:"🚀", color:"#10B981", keywords:["full-stack","MVP","shipping","cross-functional","fast-paced"],                            tone:"Generalists who ship fast."}
+  },
+  law: {
+    Student:   {icon:"🎓", color:"#C8F56A", keywords:["moot court","legal research","academic project","case analysis","law review"],           tone:"Highlight moots, research papers, internships, and academic distinctions."},
+    BigLaw:    {icon:"🏢", color:"#8B7FFF", keywords:["due diligence","transaction advisory","contract negotiation","regulatory compliance"],    tone:"Transactional precision, attention to detail, and client advisory depth."},
+    Corporate: {icon:"💼", color:"#38BDF8", keywords:["in-house counsel","legal risk","corporate governance","compliance","statutory filing"],   tone:"Business-aware legal thinking."},
+    Litigation:{icon:"🏛️", color:"#FF9F43", keywords:["brief preparation","dispute resolution","appellate advocacy","courtroom","case strategy"],tone:"Advocacy strength and strategic litigation planning."},
+    IPFirm:    {icon:"🔒", color:"#FF6B6B", keywords:["trademark prosecution","patent drafting","IP portfolio","licensing","infringement"],      tone:"Specialist IP knowledge and portfolio management."},
+    NGO:       {icon:"🌱", color:"#10B981", keywords:["public interest litigation","constitutional law","human rights","legal aid","advocacy"],  tone:"Social justice focus, PIL experience."}
   }
+};
 
-  if (projs.length >= 2) { score += 10; wins.push(`${projs.length} projects listed`); }
-  else { issues.push("Aim for at least 2 detailed technical projects"); }
+const WEAK_VERBS = ["worked on","helped with","was responsible for","assisted in","participated in","involved in"];
+const STRONG_TECH = ["Engineered","Architected","Spearheaded","Delivered","Designed","Optimized","Launched","Implemented","Built","Developed","Automated","Deployed"];
+const STRONG_LAW  = ["Drafted","Argued","Advised","Formulated","Negotiated","Researched","Represented","Advocated","Structured","Litigated","Documented","Briefed"];
 
-  const edus = form.education.filter(e => e.institution || e.degree);
-  if (edus.length > 0) { score += 10; wins.push("Education credentials present"); }
-  else { issues.push("Add your college/school education details"); }
+let activeDomain   = 'tech';
+let activeRole     = null;
+let selectedCos    = [];
+let activeTemplate = 'classic';
+let skillMode      = 'categorized';
+let expCount = 0, projCount = 0, eduCount = 0;
 
-  if (selectedCompanies.length > 0) {
-    const allText = (form.summary + " " + form.skills + " " + form.experience.map(e => e.description).join(" ") + " " + form.projects.map(p => p.title + " " + p.problem).join(" ")).toLowerCase();
-    
-    let combinedKeywords = [];
-    selectedCompanies.forEach(co => {
-      combinedKeywords = [...combinedKeywords, ...COMPANY_PROFILES[co].keywords];
-    });
-    // Distinct values
-    combinedKeywords = [...new Set(combinedKeywords)];
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+window.onload = function(){
+  renderRoleGrid();
+  renderCoGrid();
+  addEdu(); addExp(); addProj();
+  applyDomainUI();
+  updateATS();
+};
 
-    const matched = combinedKeywords.filter(k => allText.includes(k.toLowerCase()));
-    if (matched.length >= Math.min(4, combinedKeywords.length)) {
-      score += 16;
-      wins.push(`${matched.length} cross-profile keyword targets met`);
-    } else {
-      issues.push(`Target more stack profile tags (${selectedCompanies.join(", ")})`);
-    }
-  }
-
-  score = Math.min(100, score);
-  const grade = score >= 85 ? "A" : score >= 70 ? "B" : score >= 55 ? "C" : "D";
-  const label = score >= 85 ? "ATS Compliant" : score >= 70 ? "Good" : score >= 55 ? "Needs Work" : "Incomplete";
-
-  return { score, grade, label, issues: issues.slice(0, 5), wins: wins.slice(0, 4) };
+// ══════════════════════════════════
+// DOMAIN SWITCH
+// ══════════════════════════════════
+function switchDomain(key){
+  activeDomain = key;
+  activeRole   = null;
+  document.querySelectorAll(".domain-tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("dt-"+key).classList.add("active");
+  document.getElementById("role-auto-note").innerHTML = "";
+  expCount=0; projCount=0;
+  document.getElementById("exp-list").innerHTML="";
+  document.getElementById("proj-list").innerHTML="";
+  addExp(); addProj();
+  renderRoleGrid();
+  renderCoGrid();
+  applyDomainUI();
+  updateATS();
 }
 
-// 3. GENERATION AUTOMATION ENHANCEMENTS
-function enhanceBullet(desc, role, selectedCompanies) {
-  if (!desc || desc.trim().length < 5) return "Developed software layers, designed core logic routines, and validated framework performance.";
-  let out = desc.trim();
+function applyDomainUI(){
+  const cfg = DOMAIN_CONFIG[activeDomain];
+  document.getElementById('proj-sec-title').textContent  = cfg.sec07Title;
+  document.getElementById('proj-sec-desc').textContent   = cfg.sec07Desc;
+  document.getElementById('proj-add-btn').textContent    = cfg.addProjBtn;
+  document.getElementById('lbl-portfolio').textContent   = cfg.portfolioLabel;
+  document.getElementById('f-github').placeholder        = cfg.portfolioPH;
+  document.getElementById('lbl-extra-link').textContent  = cfg.extraLinkLabel;
+  document.getElementById('f-extralink').placeholder     = cfg.extraLinkPH;
+  document.getElementById('lbl-achieve').textContent     = cfg.achieveLabel;
+  document.getElementById('f-achieve').placeholder       = cfg.achievePH;
+  // Update skill category labels
+  cfg.catLabels.forEach((lbl,i) => {
+    const el = document.getElementById('cat-label-'+(i+1));
+    if(el) el.textContent = lbl;
+  });
+  cfg.catPlaceholders.forEach((ph,i) => {
+    const el = document.getElementById('cat-'+(i+1));
+    if(el) el.placeholder = ph;
+  });
+}
 
-  WEAK_VERBS.forEach(w => {
-    const re = new RegExp(`^${w}\\b`, "i");
-    out = out.replace(re, "Spearheaded design and implementation of");
+// ══════════════════════════════════
+// SKILL MODE
+// ══════════════════════════════════
+function switchSkillMode(mode){
+  skillMode = mode;
+  document.getElementById('skills-cat-panel').style.display = mode==='categorized' ? 'block' : 'none';
+  document.getElementById('skills-flat-panel').style.display = mode==='flat' ? 'block' : 'none';
+  document.getElementById('mode-cat').classList.toggle('active', mode==='categorized');
+  document.getElementById('mode-flat').classList.toggle('active', mode==='flat');
+  updateATS();
+}
+
+// ══════════════════════════════════
+// ROLE GRID
+// ══════════════════════════════════
+function renderRoleGrid(){
+  const g = document.getElementById('role-grid');
+  g.innerHTML = '';
+  Object.entries(ROLES).forEach(([key,r])=>{
+    if(r.domain !== activeDomain) return;
+    const d = document.createElement('div');
+    d.className = 'role-btn'+(activeRole===key?' active':'');
+    d.id = 'rb-'+key;
+    d.innerHTML = `<span class="role-icon">${r.icon}</span><div class="role-name">${r.name}</div>`;
+    d.onclick = ()=>selectRole(key);
+    g.appendChild(d);
+  });
+}
+
+function selectRole(key){
+  activeRole = key;
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('rb-'+key);
+  if(btn) btn.classList.add('active');
+  const r = ROLES[key];
+  const roleIn = document.getElementById('f-role');
+  if(!roleIn.value || roleIn.dataset.auto==='1'){ roleIn.value=r.title; roleIn.dataset.auto='1'; }
+  // Auto-fill flat skills
+  const skillIn = document.getElementById('f-skills');
+  if(!skillIn.value || skillIn.dataset.auto==='1'){ skillIn.value=r.skills; skillIn.dataset.auto='1'; renderChips(); }
+  document.getElementById('role-auto-note').innerHTML = `<span>✓ ${r.name}</span> track active — skills calibrated.`;
+  updateATS();
+}
+
+// ══════════════════════════════════
+// COMPANY GRID
+// ══════════════════════════════════
+function renderCoGrid(){
+  selectedCos = [];
+  const g = document.getElementById('co-grid');
+  g.innerHTML = '';
+  Object.entries(COMPANIES[activeDomain]).forEach(([name,c])=>{
+    const d = document.createElement('div');
+    d.className = 'co-btn';
+    d.id = 'cb-'+name;
+    d.innerHTML = `<span class="co-icon">${c.icon}</span><div class="co-name">${name}</div>`;
+    d.onclick = ()=>toggleCo(name,c.color);
+    g.appendChild(d);
+  });
+  document.getElementById('co-hint').classList.remove('show');
+  updateATS();
+}
+
+function toggleCo(name,color){
+  const i = selectedCos.indexOf(name);
+  if(i>-1) selectedCos.splice(i,1); else selectedCos.push(name);
+  const btn = document.getElementById('cb-'+name);
+  if(selectedCos.includes(name)){ btn.classList.add('active'); btn.style.borderColor=color; }
+  else{ btn.classList.remove('active'); btn.style.borderColor=''; }
+  updateCoHint(); updateATS();
+}
+
+function updateCoHint(){
+  const hint = document.getElementById('co-hint');
+  if(!selectedCos.length){ hint.classList.remove('show'); return; }
+  hint.classList.add('show');
+  const cos = COMPANIES[activeDomain];
+  document.getElementById('co-hint-text').textContent = selectedCos.map(n=>cos[n].tone).join(' | ');
+  const kws = [...new Set(selectedCos.flatMap(n=>cos[n].keywords))].slice(0,10);
+  document.getElementById('co-kw-row').innerHTML = kws.map(k=>`<span class="kw" style="color:var(--accent)">${k}</span>`).join('');
+}
+
+// ══════════════════════════════════
+// CARD BUILDERS
+// ══════════════════════════════════
+function addEdu(){
+  eduCount++;
+  const id=eduCount, list=document.getElementById('edu-list');
+  const d=document.createElement('div'); d.className='card'; d.id='edu-'+id;
+  let instPH="Institution Name", degPH="Degree / Course";
+  if(id===1){ instPH="University / College Name"; degPH=(activeDomain==='law'?"B.A. LL.B. (Hons) — CGPA 8.5":"BTech / MTech — CGPA / %"); }
+  else if(id===2){ instPH="Class 12th School Name"; degPH="10+2, XX%, Stream, Board"; }
+  else if(id===3){ instPH="Class 10th School Name"; degPH="10, XX%, Board (ICSE/CBSE)"; }
+  d.innerHTML=`<div class="card-badge">EDU ${pad(id)}</div>
+    ${id>1?`<button class="card-remove" onclick="removeCard('edu-${id}');updateATS()">Remove</button>`:''}
+    <div class="g3" style="margin-top:12px">
+      <div class="field"><label>Institution / School</label><input id="edu-inst-${id}" placeholder="${instPH}" oninput="updateATS()"/></div>
+      <div class="field"><label>Degree / Board & Score</label><input id="edu-deg-${id}" placeholder="${degPH}" oninput="updateATS()"/></div>
+      <div class="field"><label>Year of Passing</label><input id="edu-yr-${id}" placeholder="2025" oninput="updateATS()"/></div>
+    </div>`;
+  list.appendChild(d);
+}
+
+function addExp(){
+  expCount++;
+  const id=expCount, list=document.getElementById('exp-list');
+  const cfg = DOMAIN_CONFIG[activeDomain];
+  const d=document.createElement('div'); d.className='card'; d.id='exp-'+id;
+  d.innerHTML=`<div class="card-badge">EXP ${pad(id)}</div>
+    ${id>1?`<button class="card-remove" onclick="removeCard('exp-${id}');updateATS()">Remove</button>`:''}
+    <div style="margin-top:12px">
+      <div class="g2">
+        <div class="field"><label>${cfg.expCoLabel}</label><input id="exp-co-${id}" placeholder="${cfg.expCoLabel}" oninput="updateATS()"/></div>
+        <div class="field"><label>${cfg.expRoleLabel}</label><input id="exp-role-${id}" placeholder="${cfg.expRolePH}" oninput="updateATS()"/></div>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Duration</label><input id="exp-dur-${id}" placeholder="08/2023 – present" oninput="updateATS()"/></div>
+        <div class="field"><label>Employment Type</label>
+          <select id="exp-type-${id}" onchange="updateATS()">
+            <option value="fulltime">Full-Time</option>
+            <option value="intern">Internship</option>
+            <option value="contract">Contract</option>
+            <option value="none">Don't show tag</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Key contributions — one per line. Use **bold** for metrics and tech names.</label>
+        <textarea id="exp-desc-${id}" placeholder="${cfg.expPlaceholder}" rows="5" oninput="updateATS()"></textarea>
+      </div>
+      <div class="bold-hint">e.g. <span>**25%**</span> boost, <span>**C++**</span>, <span>**Agile**</span> — shows as bold in output</div>
+    </div>`;
+  list.appendChild(d);
+}
+
+function addProj(){
+  projCount++;
+  const id=projCount, list=document.getElementById('proj-list');
+  const cfg = DOMAIN_CONFIG[activeDomain];
+  const d=document.createElement('div'); d.className='card'; d.id='proj-'+id;
+  d.innerHTML=`<div class="card-badge">${cfg.projCardBadge} ${pad(id)}</div>
+    ${id>1?`<button class="card-remove" onclick="removeCard('proj-${id}');updateATS()">Remove</button>`:''}
+    <div style="margin-top:12px">
+      <div class="g2">
+        <div class="field"><label>${cfg.projTitleLabel}</label><input id="proj-title-${id}" placeholder="${cfg.projTitlePH}" oninput="updateATS()"/></div>
+        <div class="field"><label>${cfg.projTechLabel}</label><input id="proj-tech-${id}" placeholder="${cfg.projTechPH}"/></div>
+      </div>
+      <div class="field">
+        <label>${cfg.projDescLabel}</label>
+        <textarea id="proj-desc-${id}" placeholder="${cfg.projDescPH}" rows="3" oninput="updateATS()"></textarea>
+      </div>
+    </div>`;
+  list.appendChild(d);
+}
+
+function removeCard(id){ const el=document.getElementById(id); if(el) el.remove(); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function getVal(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+
+// ══════════════════════════════════
+// BOLD MARKDOWN PARSER
+// parseBold("Led **C++** development by **25%**")
+// → "Led <strong>C++</strong> development by <strong>25%</strong>"
+// ══════════════════════════════════
+function parseBold(text){
+  if(!text) return '';
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
+// Render chips for flat mode
+function renderChips(){
+  const chips = document.getElementById('skill-chips');
+  if(!chips) return;
+  const skills = getVal('f-skills').split(',').map(s=>s.trim()).filter(Boolean);
+  chips.innerHTML = skills.map(s=>`<span class="chip">${s}</span>`).join('');
+}
+
+// ══════════════════════════════════
+// CLEAN ATS ENGINE
+// ══════════════════════════════════
+function getAllSkillsText(){
+  if(skillMode === 'categorized'){
+    return [getVal('cat-1'),getVal('cat-2'),getVal('cat-3'),getVal('cat-4')].join(', ');
+  }
+  return getVal('f-skills');
+}
+
+function getAllSkillsCount(){
+  const text = getAllSkillsText();
+  return text.split(',').map(s=>s.trim()).filter(Boolean).length;
+}
+
+function calcATS(){
+  let score = 0;
+  const issues = [], wins = [];
+  const cfg = DOMAIN_CONFIG[activeDomain];
+  const cos = COMPANIES[activeDomain];
+  const isLaw = activeDomain === 'law';
+
+  const name     = getVal('f-name');
+  const role     = getVal('f-role');
+  const email    = getVal('f-email');
+  const phone    = getVal('f-phone');
+  const linkedin = getVal('f-linkedin');
+  const github   = getVal('f-github');
+  const extralink= getVal('f-extralink');
+  const summary  = getVal('f-summary');
+  const achieve  = getVal('f-achieve');
+  const skillsText = getAllSkillsText();
+  const skillCount = getAllSkillsCount();
+
+  // ── 1. CONTACT COMPLETENESS (18 pts) ──────────────────
+  if(name)  score += 4; else issues.push("Add your full name");
+  if(role)  score += 4; else issues.push("Add your target job title");
+  if(email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ score += 3; }
+  else { issues.push("Add a valid email address"); }
+  if(phone && phone.replace(/\D/g,'').length >= 10){ score += 3; }
+  else { issues.push("Add a phone number with country/area code"); }
+  if(linkedin){ score += 2; wins.push("LinkedIn profile included"); }
+  else { issues.push("Add your LinkedIn URL — recruiters always check"); }
+
+  // Domain-specific link scoring
+  if(isLaw){
+    // Law: portfolio/bar link matters more than GitHub
+    if(github){ score += 1; wins.push("Bar/portfolio link included"); }
+    if(extralink){ score += 1; wins.push("Publications/research profile linked"); }
+    else { issues.push("Add a publications or research profile link"); }
+  } else {
+    // Tech: GitHub is important, LeetCode/GFG is bonus
+    if(github){ score += 2; wins.push("GitHub/portfolio link included — great for tech roles"); }
+    else { issues.push("Add your GitHub or portfolio link — tech recruiters expect this"); }
+    if(extralink){ score += 1; wins.push("LeetCode/GFG profile linked — shows problem-solving commitment"); }
+  }
+
+  // ── 2. PROFESSIONAL SUMMARY (8 pts) ───────────────────
+  const summaryClean = summary.replace(/\*\*/g,'').trim();
+  const summaryWords = summaryClean.split(/\s+/).filter(Boolean).length;
+  if(summaryWords >= 20 && summaryWords <= 60){
+    score += 8; wins.push("Professional summary is well-written (20-60 words)");
+  } else if(summaryWords > 60){
+    score += 4; issues.push("Summary is too long — keep it under 60 words (2-3 sentences)");
+  } else if(summaryWords > 0){
+    issues.push("Expand your summary — aim for at least 20 words (2-3 sentences)");
+  }
+
+  // ── 3. SKILLS QUALITY (12 pts) ────────────────────────
+  if(skillCount >= 8 && skillCount <= 20){
+    score += 12; wins.push(`Good skills coverage (${skillCount} skills listed)`);
+  } else if(skillCount > 20){
+    score += 6; issues.push(`Too many skills (${skillCount}) — trim to your top 15-20 most relevant`);
+  } else if(skillCount >= 4){
+    score += 4; issues.push(`Add more skills (${skillCount} listed — aim for 8-20)`);
+  } else if(skillCount > 0){
+    issues.push(`Only ${skillCount} skill(s) listed — add at least 8 relevant skills`);
+  } else {
+    issues.push("Add your skills — this is one of the first things ATS scans");
+  }
+
+  // Duplicate skills check
+  const skillArr = skillsText.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+  const skillSet = new Set(skillArr);
+  if(skillArr.length !== skillSet.size){
+    issues.push("Remove duplicate skills — same skill listed more than once");
+  }
+
+  // ── 4. EXPERIENCE QUALITY (22 pts) ────────────────────
+  const expTexts = [];
+  let hasExpCo = false;
+  let metricCount = 0;
+  let weakVerbCount = 0;
+  let shortBullets = 0;
+  let longBullets = 0;
+  let totalBullets = 0;
+  let firstVerbs = [];
+
+  document.querySelectorAll('[id^="exp-co-"]').forEach(el=>{ if(el.value.trim()) hasExpCo = true; });
+
+  document.querySelectorAll('[id^="exp-desc-"]').forEach(ta => {
+    const val = ta.value.trim();
+    if(!val) return;
+    expTexts.push(val);
+    const lines = val.split('\n').map(l=>l.trim()).filter(Boolean);
+    lines.forEach(line => {
+      const clean = line.replace(/\*\*/g,'');
+      const wordCount = clean.split(/\s+/).filter(Boolean).length;
+      totalBullets++;
+      if(wordCount < 8)  shortBullets++;
+      if(wordCount > 35) longBullets++;
+      const nums = clean.match(/\d+%|\d+\+|\b\d{2,}\b/g);
+      if(nums) metricCount += nums.length;
+      const firstWord = clean.split(/\s+/)[0].replace(/[^a-zA-Z]/g,'').toLowerCase();
+      if(firstWord) firstVerbs.push(firstWord);
+      if(WEAK_VERBS.some(v => clean.toLowerCase().startsWith(v))) weakVerbCount++;
+    });
   });
 
-  if (selectedCompanies.length > 0) {
-    // Pick first available boost statement from active criteria layers
-    const primaryTarget = selectedCompanies[selectedCompanies.length - 1];
-    const randomBoost = COMPANY_PROFILES[primaryTarget].boost[0];
-    if (!out.toLowerCase().includes(randomBoost.split(" ")[0])) {
-      out = out.replace(/[.,]?\s*$/, "") + ` and successfully ${randomBoost}`;
-    }
+  if(hasExpCo){ score += 8; wins.push("Work experience section filled"); }
+  else { issues.push("Add at least one work experience or internship"); }
+
+  if(metricCount >= 3){
+    score += 8; wins.push(`${metricCount} quantified achievements — excellent for ATS`);
+  } else if(metricCount >= 1){
+    score += 4; issues.push("Add more numbers to bullets — aim for 3+ metrics like 25%, 10x, 500+ users");
+  } else if(expTexts.length > 0){
+    issues.push("No metrics found — add numbers to every bullet (%, time saved, users, revenue)");
   }
 
-  return out.charAt(0).toUpperCase() + out.slice(1);
-}
-
-function buildProjectBullet(p, selectedCompanies) {
-  const tech = p.tech ? ` using ${p.tech}` : "";
-  const prob = p.problem ? ` to solve ${p.problem}` : "";
-  const built = p.built ? `, building ${p.built}` : "";
-  const result = p.result ? `, resulting in ${p.result}` : ".";
-
-  return `Architected ${p.title}${tech}${prob}${built}${result}`;
-}
-
-function generateSummary(form, selectedCompanies) {
-  if (form.summary && form.summary.trim().length > 30) return form.summary;
-
-  const skills = form.skills.split(",").slice(0, 3).map(s => s.trim()).filter(Boolean);
-  const targetRole = form.role || "Software Engineering Enthusiast";
-
-  let base = `Detail-oriented engineer and aspiring ${targetRole}`;
-  if (skills.length > 0) base += ` with foundational specialization in ${skills.join(", ")}`;
-  base += `. Competent in software development principles, operational algorithms, and scalable framework logic. Proven through practical deliverables and cross-functional design builds.`;
-
-  const corporateTargets = selectedCompanies.filter(c => c !== "Student");
-  if (corporateTargets.length > 0) {
-    base += ` Target ecosystem tracking focus aimed at development parameters aligned with ${corporateTargets.join(" and ")} infrastructures.`;
+  if(weakVerbCount > 0){
+    score -= Math.min(weakVerbCount * 2, 8);
+    issues.push(`${weakVerbCount} weak verb(s) found — replace "worked on", "helped with" with strong verbs like Built, Led, Optimized`);
+  } else if(firstVerbs.length > 0){
+    score += 6; wins.push("Strong action verbs used throughout experience");
   }
-  return base;
-}
 
-// 4. DESIGN TYPOGRAPHY AND LAYOUT MATRIX (UPGRADED FOR FULL RESPONSIVENESS)
-const css = `
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,700;0,900;1,700&family=Inter:wght@400;500;600;700&display=swap');
+  // Bullet length check
+  if(totalBullets > 0){
+    if(shortBullets > 0) issues.push(`${shortBullets} bullet(s) too short — each point should be at least 8 words to show real impact`);
+    if(longBullets > 0)  issues.push(`${longBullets} bullet(s) too long — keep each point under 35 words for ATS readability`);
+  }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  // ── 5. EDUCATION (8 pts) ──────────────────────────────
+  let eduCount = 0;
+  document.querySelectorAll('[id^="edu-inst-"]').forEach(el=>{ if(el.value.trim()) eduCount++; });
+  if(eduCount >= 2){
+    score += 8; wins.push(`${eduCount} education entries — complete academic history`);
+  } else if(eduCount === 1){
+    score += 5; wins.push("Education section present");
+    if(!isLaw) issues.push("Add Class 12th and 10th education blocks for a complete profile");
+  } else {
+    issues.push("Add your education details — degree, institution, and year");
+  }
 
-:root {
-  --bg:#07070a; --s1:#0d0d12; --s2:#131318; --s3:#18181f;
-  --border:#1f1f28; --border2:#2a2a36;
-  --text:#dddde8; --sub:#54546a; --muted:#2e2e3c;
-  --accent:#C8F56A; --accent2:#7B6FFF; --red:#FF6B6B;
-  --mono:'DM Mono', monospace; --display:'Fraunces', serif;
-}
+  // ── 6. PROJECTS / MOOT COURTS (12 pts) ───────────────
+  let projFilled = 0;
+  document.querySelectorAll('[id^="proj-title-"]').forEach(el=>{ if(el.value.trim()) projFilled++; });
+  if(projFilled >= 3){
+    score += 12; wins.push(cfg.atsWin(projFilled) + " — strong portfolio");
+  } else if(projFilled === 2){
+    score += 8; wins.push(cfg.atsWin(projFilled));
+  } else if(projFilled === 1){
+    score += 4; issues.push(cfg.atsNeed);
+  } else {
+    issues.push(cfg.atsNeed);
+  }
 
-body { background: var(--bg); color: var(--text); font-family: var(--mono); }
-.app { min-height: 100vh; }
-.shell { max-width:820px; margin:0 auto; padding: 44px 20px 80px; }
-.topbar { display: flex; align-items:center; justify-content: space-between; margin-bottom: 24px; }
-.brand { display: flex; align-items:center; gap:10px; }
-.brand-dot { width:8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow:0 0 10px var(--accent); }
-.brand-name { font-family: var(--display); font-size:18px; font-weight:700; color:#fff; }
-.brand-tag { font-size: 9px; letter-spacing:3px; color:var(--sub); }
-.hero { margin-bottom:40px; }
-.hero-kicker { font-size: 9px; letter-spacing:5px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
-.hero-h { font-family: var(--display); font-size:clamp(28px, 5vw, 48px); font-weight:900; color:#fff; line-height:1.1; margin-bottom:12px; }
-.hero-h em { font-style: italic; color:var(--accent); }
-.hero-sub { font-size:12px; color: var(--sub); line-height: 1.8; max-width: 460px; }
-.sec { margin-bottom: 40px; }
-.sec-head { display: flex; align-items: center; gap:14px; margin-bottom:20px; }
-.sec-n { font-size: 9px; letter-spacing:3px; color:var(--accent); }
-.sec-title { font-family: var(--display); font-size:16px; font-weight:700; color:#fff; }
-.sec-line { flex:1; height: 1px; background: var(--border); }
-
-/* Grid systems optimized for responsive wrapping */
-.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
-.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-
-.field { margin-bottom:14px; }
-.field label { display:block; font-size:8px; letter-spacing:3px; color:var(--sub); text-transform: uppercase; margin-bottom:6px; }
-.field input, .field textarea, .field select {
-  width:100%; background: var(--s2); border:1px solid var(--border);
-  border-radius: 9px; padding:12px 14px; color:var(--text);
-  font-size:12px; font-family: var(--mono); outline: none; resize:vertical;
-}
-.field input:focus, .field textarea:focus { border-color:var(--accent); }
-.card { background: var(--s1); border:1px solid var(--border); border-radius:14px; padding:24px; position:relative; margin-bottom:16px; }
-.card-badge { position:absolute; top:-10px; left:20px; background: var(--bg); padding: 0 8px; font-size:8px; letter-spacing:3px; color:var(--accent); }
-
-/* Responsive Grid layout for ecosystems */
-.co-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-.co-btn { background: var(--s2); border:1px solid var(--border); border-radius:10px; padding:16px 8px; text-align:center; cursor:pointer; transition: all .15s; position: relative; }
-.co-btn.active { border-color:var(--accent); background:rgba(200,245,106,.06); }
-.co-icon { font-size:22px; margin-bottom:5px; }
-.co-name { font-size:10px; color:var(--text); font-weight: 500; }
-.co-check { position: absolute; top: 6px; right: 8px; font-size: 9px; color: var(--accent); opacity: 0; }
-.co-btn.active .co-check { opacity: 1; }
-
-.co-tip { margin-top:14px; background: var(--s2); border:1px solid var(--border); border-radius:10px; padding:16px; font-size:11px; color:var(--sub); line-height:1.7; }
-.co-kws { display: flex; flex-wrap:wrap; gap: 6px; margin-top:10px; }
-.co-kw { background: var(--s3); border:1px solid var(--border2); border-radius: 4px; padding:3px 8px; font-size:9px; color:var(--accent); }
-
-/* ATS MONITOR PANEL */
-.ats-panel { background: var(--s1); border:1px solid var(--border); border-radius:14px; padding:24px; margin-top:32px; }
-.ats-top { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 20px; }
-.ats-ring { width: 82px; height: 82px; border-radius: 50%; border:2px solid var(--border); display: flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink: 0; }
-.ats-num { font-family: var(--display); font-size: 28px; font-weight: 900; line-height:1; }
-.ats-sub { font-size:8px; letter-spacing: 2px; margin-top:2px; color:var(--sub); }
-.ats-bar-wrap { flex:1; min-width: 240px; }
-.ats-bar-labels { display: flex; justify-content: space-between; font-size: 9px; color:var(--sub); margin-bottom:8px; }
-.ats-bar-bg { height: 6px; background: var(--muted); border-radius: 99px; overflow:hidden; }
-.ats-bar-fill { height:100%; border-radius: 99px; background:var(--accent); transition: width 0.3s ease; }
-.ats-info { font-size: 11px; margin-top: 8px; color: var(--sub); line-height: 1.5; }
-.ats-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
-.ats-col-t { font-size: 8px; letter-spacing:3px; margin-bottom:10px; text-transform:uppercase; font-weight:700; }
-.ats-item { display: flex; align-items: center; gap:8px; font-size:11px; margin-bottom:6px; color:var(--text); }
-.skill-preview { display: flex; flex-wrap:wrap; gap: 6px; margin-top:8px; }
-.skill-chip { background: var(--s3); border:1px solid var(--border2); border-radius: 4px; padding:3px 9px; font-size:10px; color:var(--text); }
-
-/* SYSTEM CONTROLS BUTTONS */
-.btn { border:none; border-radius: 9px; padding: 13px 26px; font-weight:500; font-family:var(--mono); font-size:12px; cursor:pointer; transition:all .15s; }
-.btn-accent { background: var(--accent); color: #060a00; font-weight:700; }
-.btn-accent:disabled { background: var(--muted); color: var(--sub); cursor: not-allowed; }
-.btn-ghost { background: transparent; color:var(--sub); border:1px solid var(--border); }
-.btn-ghost:hover { color: var(--text); border-color:var(--border2); }
-.btn-add { width:100%; background: transparent; border:1px dashed var(--border); border-radius:10px; padding:14px; color:var(--sub); font-family:var(--mono); font-size:11px; cursor:pointer; margin-top:4px; }
-.btn-add:hover { border-color:var(--accent); color: var(--accent); }
-.btn-rm { position:absolute; top:14px; right:14px; background: transparent; border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:10px; color:var(--sub); cursor:pointer; }
-.btn-rm:hover { border-color:var(--red); color:var(--red); }
-.action-row { display: flex; gap: 12px; margin-top:32px; flex-wrap:wrap; align-items:center; }
-.req-note { font-size:10px; color:var(--red); }
-.out-bar { display: flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:28px; }
-.out-label { text-align:center; font-size:10px; color:var(--accent); letter-spacing:3px; margin-bottom:14px; text-transform:uppercase; }
-.print-hint { text-align:center; color:var(--muted); font-size:10px; margin-top:16px; }
-
-/* PRISTINE EXECUTIVE WHITE RESUME SHEET CSS */
-.resume {
-  background: #FFFFFF !important;
-  color: #111111 !important;
-  font-family: 'Inter', -apple-system, sans-serif !important;
-  padding: 40px 45px !important;
-  border-radius: 6px !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.15) !important;
-  line-height: 1.5 !important;
-}
-.r-co-badges {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 6px !important;
-  margin-bottom: 24px !important;
-}
-.r-co-badge {
-  display: inline-block !important;
-  background: #f3f4f6 !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 4px !important;
-  padding: 4px 10px !important;
-  font-size: 10px !important;
-  color: #4b5563 !important;
-  font-family: var(--mono) !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-}
-.r-hd { border-bottom: 2px solid #111111 !important; padding-bottom: 12px !important; margin-bottom: 20px !important; }
-.r-name { font-family: var(--display) !important; font-size: clamp(24px, 4vw, 32px) !important; font-weight: 800 !important; color: #111111 !important; line-height: 1.1 !important; letter-spacing: -0.5px !important; }
-.r-role { font-size: 13px !important; color: #4b5563 !important; font-weight: 500 !important; margin-top: 4px !important; margin-bottom: 8px !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
-.r-contacts { display: flex !important; flex-wrap: wrap !important; gap: 0 14px !important; font-size: 11px !important; color: #6b7280 !important; }
-.r-sec { margin-bottom: 20px !important; }
-.r-sec-t { font-size: 11px !important; font-weight: 700 !important; color: #111111 !important; text-transform: uppercase !important; letter-spacing: 1.5px !important; border-bottom: 1px solid #e5e7eb !important; padding-bottom: 4px !important; margin-bottom: 10px !important; }
-.r-summary { font-size: 12px !important; color: #374151 !important; line-height: 1.6 !important; text-align: justify !important; }
-.r-skills { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
-.r-skill { background: #f3f4f6 !important; border: 1px solid #e5e7eb !important; color: #111111 !important; font-size: 11px !important; padding: 3px 8px !important; border-radius: 4px !important; font-weight: 500 !important; }
-.r-exp-item { margin-bottom: 12px !important; }
-.r-exp-header { display: flex !important; justify-content: space-between !important; align-items: baseline !important; font-size: 13px !important; font-weight: 700 !important; color: #111111 !important; flex-wrap: wrap; gap: 4px; }
-.r-exp-role { font-weight: 700 !important; }
-.r-exp-meta { display: flex !important; justify-content: space-between !important; font-size: 11px !important; color: #6b7280 !important; margin-top: 1px !important; margin-bottom: 4px !important; font-style: italic !important; }
-.r-exp-desc { font-size: 12px !important; color: #374151 !important; line-height: 1.5 !important; padding-left: 14px !important; display: list-item !important; list-style-type: disc !important; }
-.r-proj-item { margin-bottom: 12px !important; }
-.r-proj-title-bar { display: flex !important; justify-content: space-between !important; align-items: baseline !important; flex-wrap: wrap; gap: 4px; }
-.r-proj-title { font-size: 13px !important; font-weight: 700 !important; color: #111111 !important; }
-.r-proj-tech { font-size: 11px !important; color: #4b5563 !important; font-weight: 600 !important; font-family: var(--mono) !important; }
-.r-proj-desc { font-size: 12px !important; color: #374151 !important; line-height: 1.5 !important; margin-top: 3px !important; padding-left: 14px !important; display: list-item !important; list-style-type: disc !important; }
-
-@media print {
-  body { background: #ffffff !important; }
-  body * { visibility: hidden !important; }
-  .resume, .resume * { visibility: visible !important; }
-  .resume { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
-}
-
-@media (max-width: 600px) {
-  .shell { padding: 20px 14px 60px; }
-  .resume { padding: 24px 18px !important; }
-  .ats-top { flex-direction: column; align-items: flex-start; }
-  .ats-bar-wrap { width: 100%; min-width: 100%; }
-}
-`;
-
-const initForm = {
-  name: "", role: "", email: "", phone: "", location: "", linkedin: "", summary: "", skills: "",
-  experience: [{ company: "", role: "", duration: "", description: "" }],
-  projects: [{ title: "", tech: "", problem: "", built: "", result: "" }],
-  education: [{ institution: "", degree: "", year: "" }],
-  achievements: ""
-};
-
-// Form Field Component
-function F({ label, value, onChange, ph, multi }) {
-  return (
-    <div className="field">
-      <label>{label}</label>
-      {multi ? (
-        <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={ph} rows={3} />
-      ) : (
-        <input value={value} onChange={e => onChange(e.target.value)} placeholder={ph} />
-      )}
-    </div>
-  );
-}
-
-// Live ATS Feedback Component
-function ATSPanel({ form, selectedCompanies }) {
-  const { score, grade, label, issues, wins } = calcATS(form, selectedCompanies);
-  const color = score >= 85 ? "#C8F56A" : score >= 70 ? "#7B6FFF" : score >= 55 ? "#FF9900" : "#FF6B6B";
-  
-  return (
-    <div className="ats-panel">
-      <div style={{ fontSize: "8px", letterSpacing: "4px", color: "var(--sub)", marginBottom: "16px", textTransform: "uppercase" }}>
-        ATS Evaluation Output
-      </div>
-      <div className="ats-top">
-        <div className="ats-ring" style={{ borderColor: color }}>
-          <div className="ats-num" style={{ color }}>{score}</div>
-          <div className="ats-sub">/100</div>
-        </div>
-        <div className="ats-bar-wrap">
-          <div className="ats-bar-labels">
-            <span style={{ color }}>{label}</span>
-            <span>Grade: <span className="ats-grade" style={{ color }}>{grade}</span></span>
-          </div>
-          <div className="ats-bar-bg">
-            <div className="ats-bar-fill" style={{ width: `${score}%`, backgroundColor: color }}></div>
-          </div>
-          <div className="ats-info">
-            {selectedCompanies.length === 0 
-              ? "Select target strategy layers above to align metrics engines dynamically." 
-              : `Calibrating tracking matrix against ${selectedCompanies.length} active profile layouts.`}
-          </div>
-        </div>
-      </div>
-      <div className="ats-cols">
-        <div>
-          <div className="ats-col-t" style={{ color: "#FF6B6B" }}>▲ Fix These</div>
-          {issues.length === 0 ? (
-            <div className="ats-item" style={{ color: "#C8F56A" }}>✓ No critical execution gaps found</div>
-          ) : (
-            issues.map((iss, i) => <div key={i} className="ats-item">⚠️ {iss}</div>)
-          )}
-        </div>
-        <div>
-          <div className="ats-col-t" style={{ color: "#C8F56A" }}>✓ Optimizations Present</div>
-          {wins.length === 0 ? (
-            <div className="ats-item" style={{ color: "var(--sub)" }}>Provide metrics to unlock tokens.</div>
-          ) : (
-            wins.map((w, i) => <div key={i} className="ats-item" style={{ color: "#C8F56A" }}>★ {w}</div>)
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Primary Core Component Engine
-function App() {
-  const [form, setForm] = useState(initForm);
-  const [selectedCompanies, setSelectedCompanies] = useState([]);
-  const [generated, setGenerated] = useState(false);
-
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  
-  const updArr = (arr, i, k, v) => {
-    const a = [...form[arr]];
-    a[i] = { ...a[i], [k]: v };
-    setForm(f => ({ ...f, [arr]: a }));
-  };
-
-  const addArr = (arr, blank) => setForm(f => ({ ...f, [arr]: [...f[arr], blank] }));
-  const rmArr = (arr, i) => setForm(f => ({ ...f, [arr]: f[arr].filter((_, idx) => idx !== i) }));
-
-  // Handle Multi-Select Toggles
-  const handleCompanyToggle = (name) => {
-    setSelectedCompanies(prev => {
-      if (prev.includes(name)) {
-        return prev.filter(c => c !== name);
-      } else {
-        return [...prev, name];
-      }
-    });
-  };
-
-  const skills = form.skills.split(",").map(s => s.trim()).filter(Boolean);
-  const canGenerate = form.name.trim().length > 0 && form.role.trim().length > 0;
-
-  if (generated) {
-    const summary = generateSummary(form, selectedCompanies);
-    const exps = form.experience.filter(e => e.company || e.role);
-    const projs = form.projects.filter(p => p.title);
-    const edus = form.education.filter(e => e.institution || e.degree);
-
-    return (
-      <div className="app">
-        <style>{css}</style>
-        <div className="shell">
-          <div className="out-label">Resume Generated {selectedCompanies.length > 0 ? `(Calibrated)` : ""}</div>
-          <div className="out-bar">
-            <button className="btn btn-ghost" onClick={() => setGenerated(false)}>Return to Editor</button>
-            <button className="btn btn-ghost" onClick={() => { setForm(initForm); setSelectedCompanies([]); setGenerated(false); }}>Clear All</button>
-            <button className="btn btn-accent" onClick={() => window.print()}>Print / Export PDF</button>
-          </div>
-          
-          {/* PRISTINE CLEAN WHITE RESUME OUTPUT SHEET */}
-          <div className="resume">
-            {selectedCompanies.length > 0 && (
-              <div className="r-co-badges">
-                {selectedCompanies.map(co => (
-                  <span key={co} className="r-co-badge">✓ {co} Calibration Layer</span>
-                ))}
-              </div>
-            )}
-            
-            <div className="r-hd">
-              <div className="r-name">{form.name}</div>
-              <div className="r-role">{form.role}</div>
-              <div className="r-contacts">
-                {form.email && <span>{form.email}</span>}
-                {form.phone && <span>• {form.phone}</span>}
-                {form.location && <span>• {form.location}</span>}
-                {form.linkedin && <span>• {form.linkedin}</span>}
-              </div>
-            </div>
-
-            <div className="r-sec">
-              <div className="r-sec-t">Professional Summary</div>
-              <div className="r-summary">{summary}</div>
-            </div>
-
-            {skills.length > 0 && (
-              <div className="r-sec">
-                <div className="r-sec-t">Technical Competencies</div>
-                <div className="r-skills">
-                  {skills.map((s, i) => <span key={i} className="r-skill">{s}</span>)}
-                </div>
-              </div>
-            )}
-
-            {exps.length > 0 && (
-              <div className="r-sec">
-                <div className="r-sec-t">Professional Background / Training</div>
-                {exps.map((e, i) => (
-                  <div key={i} className="r-exp-item">
-                    <div className="r-exp-header">
-                      <span className="r-exp-role">{e.role}</span>
-                      <span>{e.duration}</span>
-                    </div>
-                    <div className="r-exp-meta">
-                      <span>{e.company}</span>
-                    </div>
-                    <div className="r-exp-desc">{enhanceBullet(e.description, e.role, selectedCompanies)}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {projs.length > 0 && (
-              <div className="r-sec">
-                <div className="r-sec-t">Technical Academic Projects</div>
-                {projs.map((p, i) => (
-                  <div key={i} className="r-proj-item">
-                    <div className="r-proj-title-bar">
-                      <span className="r-proj-title">{p.title}</span>
-                      {p.tech && <span className="r-proj-tech">{p.tech}</span>}
-                    </div>
-                    <div className="r-proj-desc">{buildProjectBullet(p, selectedCompanies)}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {edus.length > 0 && (
-              <div className="r-sec">
-                <div className="r-sec-t">Education</div>
-                {edus.map((e, i) => (
-                  <div key={i} className="r-exp-item">
-                    <div className="r-exp-header">
-                      <span>{e.degree}</span>
-                      <span>{e.year}</span>
-                    </div>
-                    <div className="r-exp-meta">
-                      <span>{e.institution}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {form.achievements && (
-              <div className="r-sec">
-                <div className="r-sec-t">Achievements, Certifications & Extracurriculars</div>
-                <div className="r-summary" style={{ background: "transparent", padding: 0, border: "none" }}>
-                  {form.achievements}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="print-hint">To save cleanly, trigger print settings (Cmd+P or Ctrl+P) and choose "Save as PDF".</div>
-        </div>
-      </div>
+  // ── 7. ACHIEVEMENTS SECTION (8 pts) ──────────────────
+  const achieveClean = achieve.replace(/\*\*/g,'').trim();
+  const achieveLines = achieveClean.split('\n').filter(Boolean).length;
+  if(achieveLines >= 3){
+    score += 8; wins.push(`${achieveLines} achievements listed — great differentiator`);
+  } else if(achieveLines >= 1){
+    score += 4;
+    issues.push("Add more achievements — aim for 3+ (awards, rankings, certifications, hackathons)");
+  } else {
+    issues.push(isLaw
+      ? "Add achievements — moot awards, publications, AIBE, extracurriculars"
+      : "Add achievements — hackathon rankings, certifications, LeetCode stats, awards"
     );
   }
 
-  return (
-    <div className="app">
-      <style>{css}</style>
-      <div className="shell">
-        <div className="topbar">
-          <div className="brand">
-            <div className="brand-dot"/>
-            <div>
-              <div className="brand-name">ResumeOS</div>
-              <div className="brand-tag">ATS-Optimized Builder</div>
-            </div>
-          </div>
-        </div>
+  // ── 8. KEYWORD MATCH vs ROLE + COMPANY (12 pts) ──────
+  if(activeRole || selectedCos.length > 0){
+    const projTexts = [];
+    document.querySelectorAll('[id^="proj-title-"], [id^="proj-desc-"]').forEach(el=>projTexts.push(el.value));
+    const allText = [summary, skillsText, expTexts.join(' '), projTexts.join(' '), achieve]
+      .join(' ').toLowerCase().replace(/\*\*/g,'');
+    const roleKw = activeRole ? ROLES[activeRole].keywords : [];
+    const coKw   = selectedCos.flatMap(n => cos[n] ? cos[n].keywords : []);
+    const allKw  = [...new Set([...roleKw, ...coKw])];
+    const matched = allKw.filter(k => allText.includes(k.toLowerCase()));
+    const missing = allKw.filter(k => !allText.includes(k.toLowerCase()));
+    const needed  = Math.max(2, Math.ceil(allKw.length * 0.4));
+    if(allKw.length > 0){
+      if(matched.length >= allKw.length * 0.7){
+        score += 12; wins.push(`Strong keyword match: ${matched.length}/${allKw.length} target keywords found`);
+      } else if(matched.length >= needed){
+        score += 7; wins.push(`Keyword match: ${matched.length}/${allKw.length} keywords found`);
+        if(missing.length > 0) issues.push(`Add these keywords to experience/skills: "${missing.slice(0,2).join('", "')}"`);
+      } else {
+        issues.push(`Low keyword match (${matched.length}/${allKw.length}) — add these to your resume: "${missing.slice(0,3).join('", "')}"`);
+      }
+    }
+  } else {
+    issues.push("Select a role and target company above to enable keyword matching");
+  }
 
-        <div className="hero">
-          <div className="hero-kicker">Workspace Editor</div>
-          <div className="hero-h">Build a resume<br/>that <em>gets hired.</em></div>
-          <div className="hero-sub">ATS tracking profiles, company phrase injectors, and metrics calibration tools.</div>
-        </div>
-
-        {/* 01 Basic Info */}
-        <div className="sec">
-          <div className="sec-head"><span className="sec-n">01</span><span className="sec-title">Basic Credentials</span><div className="sec-line"></div></div>
-          <div className="grid2">
-            <F label="Full Name *" value={form.name} onChange={v => set("name", v)} ph="Arjun Mehta" />
-            <F label="Target Role *" value={form.role} onChange={v => set("role", v)} ph="Software Engineer Intern / Graduate Associate" />
-          </div>
-          <div className="grid3">
-            <F label="Email" value={form.email} onChange={v => set("email", v)} ph="arjun@email.com" />
-            <F label="Phone" value={form.phone} onChange={v => set("phone", v)} ph="+91 98765 43210" />
-            <F label="Location" value={form.location} onChange={v => set("location", v)} ph="Bangalore, India" />
-          </div>
-          <F label="LinkedIn URL" value={form.linkedin} onChange={v => set("linkedin", v)} ph="linkedin.com/in/username" />
-        </div>
-
-        {/* 02 Company Optimizer (MULTI SELECT) */}
-        <div className="sec">
-          <div className="sec-head"><span className="sec-n">02</span><span className="sec-title">Target Ecosystem Calibration</span><div className="sec-line"></div></div>
-          <div style={{ fontSize: 11, color: "var(--sub)", marginBottom: 16, lineHeight: 1.6 }}>
-            Select your matching target strategies. You can tap **Student** and simultaneously pick one or more target corporate tracks to overlay key phrase metrics.
-          </div>
-          <div className="co-grid">
-            {Object.entries(COMPANY_PROFILES).map(([name, p]) => {
-              const isSelected = selectedCompanies.includes(name);
-              return (
-                <div key={name} className={`co-btn ${isSelected ? "active" : ""}`}
-                     onClick={() => handleCompanyToggle(name)}
-                     style={isSelected ? { borderColor: p.color } : {}}>
-                  <div className="co-check">✓</div>
-                  <div className="co-icon">{p.emoji}</div>
-                  <div className="co-name">{name}</div>
-                </div>
-              );
-            })}
-          </div>
-          {selectedCompanies.length > 0 && (
-            <div className="co-tip">
-              <strong>Combined Active Targets:</strong> {selectedCompanies.join(", ")}
-              <div className="co-kws">
-                {selectedCompanies.flatMap(co => COMPANY_PROFILES[co].keywords).filter((v, i, a) => a.indexOf(v) === i).slice(0, 8).map((k, i) => (
-                  <span key={i} className="co-kw">{k}</span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 03 Summary */}
-        <div className="sec">
-          <div className="sec-head"><span className="sec-n">03</span><span className="sec-title">Professional Summary</span><div className="sec-line"></div></div>
-          <F label="Summary Statement (Leave blank to let compiler auto-generate using your multi-select tracking filters)" value={form.summary} onChange={v => set("summary", v)} ph="Optional baseline brief summary description context..." multi />
-        </div>
-
-        {/* 04 Skills */}
-        <div className="sec">
-          <div className="sec-head"><span className="sec-n">04</span><span className="sec-title">Core Competencies</span><div className="sec-line"></div></div>
-          <F label="Skills Suite (Comma Separated - aim for tags like Data Structures, Python, etc.)" value={form.skills} onChange={v => set("skills", v)} ph="Data Structures, Algorithms, Java, React, Git" />
-          {skills.length > 0 && (
-            <div className="skill-preview">
-              {skills.map((s, i) => <span key={i} className="skill-chip">{s}</span>)}
-            </div>
-          )}
-        </div>
-
-        {/* 05 Experience */}
-        <div className="sec">
-          <div className="sec-head"><span className="sec-n">05</span><span className="sec-title">Work Experience / Training / Bootcamp History</span><div className="sec-line"></div></div>
-          {form.experience.map((e, i) => (
-            <div key={i} className="card">
-              <div className="card-badge">EXP ITEM {String(i + 1).padStart(2, "0")}</div>
-              {form.experience.length > 1 && <button className="btn-rm" onClick={() => rmArr("experience", i)}>Remove</button>}
-              <div className="grid2" style={{ marginTop: 10 }}>
-                <F label="Organization / College Lab" value={e.company} onChange={v => updArr("experience", i, "company", v)} ph="Tech Institute Bootcamps / Freelance" />
-                <F label="Your Title / Role" value={e.role} onChange={v => updArr("experience", i, "role", v)} ph="Software Trainee / Student Developer" />
-              </div>
-              <F label="Duration Windows" value={e.duration} onChange={v => updArr("experience", i, "duration", v)} ph="Summer 2025" />
-              <F label="Key Contributions & Learning Scope" value={e.description} onChange={v => updArr("experience", i, "description", v)} ph="Learned core database architectures and assisted with building..." multi />
-            </div>
-          ))}
-          <button className="btn-add" onClick={() => addArr("experience", { company: "", role: "", duration: "", description: "" })}>+ Add Record Field</button>
-        </div>
-
-        {/* 06 Projects */}
-        <div className="sec">
-          <div className="sec-head"><span className="sec-n">06</span><span className="sec-title">Technical Projects (Highly Critical for Students)</span><div className="sec-line"></div></div>
-          {form.projects.map((p, i) => (
-            <div key={i} className="card">
-              <div className="card-badge">PROJECT ITEM {String(i + 1).padStart(2, "0")}</div>
-              {form.projects.length > 1 && <button className="btn-rm" onClick={() => rmArr("projects", i)}>Remove</button>}
-              <div className="grid2" style={{ marginTop: 10 }}>
-                <F label="Project Identifier *" value={p.title} onChange={v => updArr("projects", i, "title", v)} ph="E-Commerce Database Layer" />
-                <F label="Tech Framework Stack" value={p.tech} onChange={v => updArr("projects", i, "tech", v)} ph="Python, MySQL, Flask" />
-              </div>
-              <F label="Problem Space Solved" value={p.problem} onChange={v => updArr("projects", i, "problem", v)} ph="unstructured data storage requirements" />
-              <F label="Core Code/Infrastructure Built" value={p.built} onChange={v => updArr("projects", i, "built", v)} ph="a normalized relational schema with indexing layers" />
-              <F label="Result / Achievement Outcome" value={p.result} onChange={v => updArr("projects", i, "result", v)} ph="passing all grading evaluation units perfectly" />
-            </div>
-          ))}
-          <button className="btn-add" onClick={() => addArr("projects", { title: "", tech: "", problem: "", built: "", result: "" })}>+ Add Project Architecture Card</button>
-        </div>
-
-        {/* 07 Education */}
-        <div className="sec">
-          <div className="sec-head"><span className="sec-n">07</span><span className="sec-title">Academic Baseline</span><div className="sec-line"></div></div>
-          {form.education.map((e, i) => (
-            <div key={i} className="card">
-              <div className="card-badge">EDU ITEM {String(i + 1).padStart(2, "0")}</div>
-              {form.education.length > 1 && <button className="btn-rm" onClick={() => rmArr("education", i)}>Remove</button>}
-              <div className="grid3" style={{ marginTop: 10 }}>
-                <F label="Institution / University" value={e.institution} onChange={v => updArr("education", i, "institution", v)} ph="XYZ University" />
-                <F label="Degree Course" value={e.degree} onChange={v => updArr("education", i, "degree", v)} ph="B.Tech Computer Science (CGPA: 8.9)" />
-                <F label="Graduation / Passing Year" value={e.year} onChange={v => updArr("education", i, "year", v)} ph="2026" />
-              </div>
-            </div>
-          ))}
-          <button className="btn-add" onClick={() => addArr("education", { institution: "", degree: "", year: "" })}>+ Add Education Milestones</button>
-        </div>
-
-        {/* 08 Achievements */}
-        <div className="sec">
-          <div className="sec-head"><span className="sec-n">08</span><span className="sec-title">Certifications, Honors & Hackathons</span><div className="sec-line"></div></div>
-          <F label="Awards, Certifications, Extracurricular positions" value={form.achievements} onChange={v => set("achievements", v)} ph="Ranked Top 5% in Smart India Hackathon, Coursera Algorithm Certificate, Coding Club Core Member..." multi />
-        </div>
-
-        <ATSPanel form={form} selectedCompanies={selectedCompanies} />
-
-        <div className="action-row">
-          <button className="btn btn-accent" onClick={() => setGenerated(true)} disabled={!canGenerate}>
-            Compile Document Blueprints
-          </button>
-          {!canGenerate && <div className="req-note">* Identity Name and Target Role are required parameters to initialize structural builds.</div>}
-        </div>
-      </div>
-    </div>
-  );
+  return {
+    score: Math.min(100, Math.max(0, Math.round(score))),
+    issues: issues.slice(0,6),
+    wins: wins.slice(0,6)
+  };
 }
 
-const container = document.getElementById('root');
-const root = ReactDOM.createRoot(container);
-root.render(<App />);
-</script>
+function updateATS(){
+  const {score,issues,wins} = calcATS();
+  const grade = score>=85?'A':score>=70?'B':score>=55?'C':'D';
+  const label = score>=85?'ATS Ready':score>=70?'Good':score>=55?'Needs Work':'Incomplete';
+  const color = score>=85?'#C8F56A':score>=70?'#8B7FFF':score>=55?'#FF9F43':'#FF6B6B';
+  const offset = 226.2*(1-score/100);
 
-</body>
-</html>
+  document.getElementById('ats-score').textContent = score;
+  document.getElementById('ats-score').style.color = color;
+  document.getElementById('ats-circle').style.stroke = color;
+  document.getElementById('ats-circle').style.strokeDashoffset = offset;
+  document.getElementById('ats-label').textContent = label;
+  document.getElementById('ats-label').style.color = color;
+  document.getElementById('ats-grade').textContent = 'Grade '+grade;
+  document.getElementById('ats-grade').style.color = color;
+  document.getElementById('ats-bar').style.width = score+'%';
+  document.getElementById('ats-bar').style.background = color;
+
+  const total = selectedCos.length+(activeRole?1:0);
+  document.getElementById('ats-note').textContent = total===0
+    ? 'Select a role and target company to calibrate the score.'
+    : `Calibrated for: ${activeRole?ROLES[activeRole].name:''}${activeRole&&selectedCos.length?' + ':''}${selectedCos.length?selectedCos.join(', '):''}`;
+
+  document.getElementById('ats-issues').innerHTML = issues.length===0
+    ? `<div class="ats-item" style="color:var(--accent)">✓ No major issues found — resume looks strong.</div>`
+    : issues.map(x=>`<div class="ats-item"><span style="color:var(--red)">→ </span>${x}</div>`).join('');
+  document.getElementById('ats-wins').innerHTML = wins.length===0
+    ? `<div class="ats-item" style="color:var(--sub)">Fill in your details to see strengths here.</div>`
+    : wins.map(x=>`<div class="ats-item"><span style="color:var(--accent)">★ </span>${x}</div>`).join('');
+
+  const canGen = !!getVal('f-name');
+  document.getElementById('gen-btn').disabled = !canGen;
+  document.getElementById('req-note').style.display = canGen?'none':'inline';
+}
+
+// ══════════════════════════════════
+// WEAK VERB ENHANCER
+// ══════════════════════════════════
+function enhance(text){
+  if(!text.trim()) return '';
+  let out = text.trim();
+  const pool = activeDomain==='law' ? STRONG_LAW : STRONG_TECH;
+  for(const w of WEAK_VERBS){
+    const re = new RegExp('^'+w+'\\b','i');
+    const cleanOut = out.replace(/\*\*/g,'');
+    if(re.test(cleanOut)){ out = out.replace(re, pool[Math.floor(Math.random()*pool.length)]); break; }
+  }
+  return out.charAt(0).toUpperCase()+out.slice(1);
+}
+
+// ══════════════════════════════════
+// SUMMARY AUTO-GENERATOR
+// ══════════════════════════════════
+function buildSummary(){
+  const manual = getVal('f-summary');
+  if(manual.length > 30) return manual;
+  if(activeRole) return ROLES[activeRole].summary;
+  const role = getVal('f-role')||(activeDomain==='law'?'Legal Professional':'Industry Professional');
+  return `Results-driven ${role} with a strong foundation in problem-solving and delivering high-quality work.`;
+}
+
+// ══════════════════════════════════
+// DATA COLLECTOR
+// ══════════════════════════════════
+function collectData(){
+  const exps=[], projs=[], edus=[];
+
+  document.querySelectorAll('#edu-list .card').forEach(card=>{
+    const num = card.id.split('-')[1];
+    const inst=getVal(`edu-inst-${num}`), deg=getVal(`edu-deg-${num}`), yr=getVal(`edu-yr-${num}`);
+    if(inst||deg) edus.push({inst,deg,yr});
+  });
+
+  document.querySelectorAll('#exp-list .card').forEach(card=>{
+    const num = card.id.split('-')[1];
+    const co=getVal(`exp-co-${num}`), role=getVal(`exp-role-${num}`),
+          dur=getVal(`exp-dur-${num}`), desc=getVal(`exp-desc-${num}`);
+    const typeEl = document.getElementById(`exp-type-${num}`);
+    const expType = typeEl ? typeEl.value : 'none';
+    if(co||role) exps.push({co,role,dur,desc,expType});
+  });
+
+  document.querySelectorAll('#proj-list .card').forEach(card=>{
+    const num = card.id.split('-')[1];
+    const title=getVal(`proj-title-${num}`), tech=getVal(`proj-tech-${num}`), desc=getVal(`proj-desc-${num}`);
+    if(title) projs.push({title,tech,desc});
+  });
+
+  // Collect skills
+  let skillsData;
+  if(skillMode === 'categorized'){
+    const cfg = DOMAIN_CONFIG[activeDomain];
+    skillsData = {
+      mode: 'categorized',
+      categories: [1,2,3,4].map(i=>({
+        label: cfg.catLabels[i-1],
+        value: getVal('cat-'+i)
+      })).filter(c=>c.value)
+    };
+  } else {
+    skillsData = {
+      mode: 'flat',
+      list: getVal('f-skills').split(',').map(s=>s.trim()).filter(Boolean)
+    };
+  }
+
+  return {
+    name:getVal('f-name'), role:getVal('f-role'), email:getVal('f-email'),
+    phone:getVal('f-phone'), location:getVal('f-location'),
+    linkedin:getVal('f-linkedin'), github:getVal('f-github'),
+    extralink:getVal('f-extralink'),
+    achieve:getVal('f-achieve'), skillsData,
+    summary:buildSummary(), exps, projs, edus, domain:activeDomain
+  };
+}
+// ══════════════════════════════════
+// RESUME SECTION BUILDERS
+// ══════════════════════════════════
+function buildHead(d){
+  const parts = [d.email];
+  if(d.phone) parts.push('• '+d.phone);
+  if(d.location) parts.push('• '+d.location);
+  if(d.linkedin) parts.push('• <a href="https://'+d.linkedin+'">LinkedIn</a>');
+  if(d.github) parts.push('• <a href="https://'+d.github+'">'+
+    (d.domain==='law'?'Portfolio':'GitHub')+'</a>');
+  if(d.extralink) parts.push('• <a href="https://'+d.extralink+'">'+
+    (d.domain==='law'?'Publications':(d.extralink.includes('gfg')||d.extralink.includes('geeksforgeeks')?'GeeksForGeeks':'LeetCode'))+'</a>');
+  return `<div class="rv-head"><div class="rv-name">${d.name}</div><div class="rv-role">${d.role}</div><div class="rv-contacts">${parts.join(' ')}</div></div>`;
+}
+
+function buildSummaryBlock(d){
+  return `<div class="rv-sec"><div class="rv-sec-title">Professional Summary</div><div class="rv-summary">${parseBold(d.summary)}</div></div>`;
+}
+
+function buildSkills(d){
+  if(d.skillsData.mode==='categorized' && d.skillsData.categories.length){
+    const rows = d.skillsData.categories.map(c=>
+      `<div class="rv-skills-cat-row"><span class="rv-skills-cat-label">${c.label}:</span> ${c.value}</div>`
+    ).join('');
+    return `<div class="rv-sec"><div class="rv-sec-title">Technical Skills</div><div class="rv-skills-cat">${rows}</div></div>`;
+  }
+  if(d.skillsData.mode==='flat' && d.skillsData.list.length){
+    return `<div class="rv-sec"><div class="rv-sec-title">Skills</div><div class="rv-skills">${d.skillsData.list.map(s=>`<span class="rv-skill">${s}</span>`).join('')}</div></div>`;
+  }
+  return '';
+}
+
+function buildEdu(d){
+  if(!d.edus.length) return '';
+  return `<div class="rv-sec"><div class="rv-sec-title">Education</div>${
+    d.edus.map(e=>`<div class="rv-edu-item"><div><strong class="rv-edu-deg">${e.deg}</strong>${e.inst?`, <span class="rv-edu-inst">${e.inst}</span>`:''}</div><div class="rv-edu-yr">${e.yr}</div></div>`).join('')
+  }</div>`;
+}
+
+function buildExp(d){
+  if(!d.exps.length) return '';
+  const title = DOMAIN_CONFIG[d.domain].resumeExpTitle;
+  return `<div class="rv-sec"><div class="rv-sec-title">${title}</div>${
+    d.exps.map(e=>{
+      const bullets = e.desc.split('\n').map(l=>l.trim()).filter(Boolean);
+      const typeTag = e.expType && e.expType!=='none'
+        ? `<span class="rv-exp-type ${e.expType}">${e.expType==='fulltime'?'Full-Time':e.expType==='intern'?'Intern':'Contract'}</span>` : '';
+      return `<div class="rv-exp-item">
+        <div class="rv-exp-top">
+          <strong class="rv-exp-co">${e.co}${typeTag}</strong>
+          <span class="rv-exp-date">${e.dur}</span>
+        </div>
+        <div class="rv-exp-role">${e.role}</div>
+        <ul class="rv-bullet-ul">${bullets.map(b=>`<li class="rv-bullet-li">${parseBold(enhance(b))}</li>`).join('')}</ul>
+      </div>`;
+    }).join('')
+  }</div>`;
+}
+
+function buildProjBullets(d){
+  if(!d.projs.length) return '';
+  const title = DOMAIN_CONFIG[d.domain].resumeProjTitle;
+  return `<div class="rv-sec"><div class="rv-sec-title">${title}</div>${
+    d.projs.map(p=>{
+      const lines = p.desc.split('\n').map(l=>l.trim()).filter(Boolean);
+      const content = lines.length > 1
+        ? `<ul class="rv-bullet-ul">${lines.map(l=>`<li class="rv-bullet-li">${parseBold(enhance(l))}</li>`).join('')}</ul>`
+        : `<div class="rv-proj-desc">${parseBold(enhance(p.desc))}</div>`;
+      return `<div class="rv-proj-item">
+        <div class="rv-proj-top">
+          <strong class="rv-proj-name">${p.title}</strong>
+          ${p.tech?`<span class="rv-proj-tech">${p.tech}</span>`:''}
+        </div>
+        ${content}
+      </div>`;
+    }).join('')
+  }</div>`;
+}
+
+function buildAchieve(d){
+  if(!d.achieve) return '';
+  const lines = d.achieve.split('\n').map(l=>l.trim()).filter(Boolean);
+  const content = lines.length > 1
+    ? `<ul class="rv-bullet-ul">${lines.map(l=>`<li class="rv-bullet-li">${parseBold(l)}</li>`).join('')}</ul>`
+    : `<div class="rv-achieve">${parseBold(d.achieve)}</div>`;
+  return `<div class="rv-sec"><div class="rv-sec-title">Achievements & Certifications</div><div class="rv-achieve">${content}</div></div>`;
+}
+
+// ══════════════════════════════════
+// TEMPLATE RENDERERS
+// ══════════════════════════════════
+function renderClassic(d){
+  return `<div class="resume">
+    ${buildHead(d)}
+    ${buildSummaryBlock(d)}
+    ${buildEdu(d)}
+    ${buildSkills(d)}
+    ${buildExp(d)}
+    ${buildProjBullets(d)}
+    ${buildAchieve(d)}
+  </div>`;
+}
+
+function renderTech(d){
+  return `<div class="resume tmpl-tech">
+    <div class="rv-full">${buildHead(d)}</div>
+    <div class="rv-sidebar">${buildSummaryBlock(d)}${buildEdu(d)}${buildSkills(d)}</div>
+    <div class="rv-main">${buildExp(d)}${buildProjBullets(d)}${buildAchieve(d)}</div>
+  </div>`;
+}
+
+// ══════════════════════════════════
+// GENERATE / NAVIGATE / CLEAR
+// ══════════════════════════════════
+function generateResume(){
+  const d = collectData();
+  document.getElementById('resume-output').innerHTML = renderClassic(d);
+  activeTemplate = 'classic';
+  document.querySelectorAll('.tmpl-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tb-classic').classList.add('active');
+  const parts = [];
+  if(activeRole) parts.push(ROLES[activeRole].name);
+  if(selectedCos.length) parts.push(selectedCos.join('+'));
+  document.getElementById('out-label').textContent = 'Resume Output'+(parts.length?' — '+parts.join(' · '):'');
+  document.getElementById('editor-view').style.display = 'none';
+  document.getElementById('preview-view').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function switchTemplate(t){
+  activeTemplate = t;
+  document.querySelectorAll('.tmpl-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tb-'+t).classList.add('active');
+  const d = collectData();
+  document.getElementById('resume-output').innerHTML = t==='tech' ? renderTech(d) : renderClassic(d);
+}
+
+function showEditor(){
+  document.getElementById('editor-view').style.display = 'block';
+  document.getElementById('preview-view').style.display = 'none';
+  window.scrollTo(0,0);
+}
+
+function clearAll(){
+  if(!confirm('Clear everything and start fresh?')) return;
+  ['f-name','f-role','f-email','f-phone','f-location','f-linkedin','f-github','f-extralink',
+   'f-summary','f-skills','f-achieve','cat-1','cat-2','cat-3','cat-4']
+    .forEach(id=>{ const el=document.getElementById(id); if(el){el.value='';el.dataset.auto='';} });
+  activeRole=null; selectedCos=[];
+  expCount=0; projCount=0; eduCount=0;
+  ['exp-list','proj-list','edu-list','skill-chips'].forEach(id=>document.getElementById(id).innerHTML='');
+  renderRoleGrid(); renderCoGrid();
+  addEdu(); addExp(); addProj();
+  applyDomainUI(); updateATS(); showEditor();
+}
+</script></body></html>
