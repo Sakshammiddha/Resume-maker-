@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>About — RoleForgeAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080810;--s1:#0e0e1a;--s2:#13131f;--s3:#1a1a28;
+  --border:#1e1e2e;--border2:#2a2a3f;
+  --text:#e2e2f0;--sub:#5a5a7a;
+  --accent:#C8F56A;--red:#FF6B6B;--blue:#38BDF8;
+  --syne:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);-webkit-font-smoothing:antialiased;min-height:100vh;}
+.shell{max-width:780px;margin:0 auto;padding:48px 24px 80px;}
+nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:52px;}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.logo-mark{width:34px;height:34px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--syne);font-weight:800;font-size:13px;color:#06090a;}
+.logo-name{font-family:var(--syne);font-weight:800;font-size:20px;color:#fff;}
+.logo-name span{color:var(--accent);}
+.back-btn{font-size:11px;color:var(--sub);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-family:var(--mono);transition:all .15s;}
+.back-btn:hover{color:var(--text);border-color:var(--accent);}
+.hero-tag{font-size:9px;letter-spacing:5px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.hero-tag::before{content:'';width:20px;height:1px;background:var(--accent);}
+.page-title{font-family:var(--syne);font-size:clamp(26px,5vw,46px);font-weight:800;color:#fff;letter-spacing:-1.5px;line-height:1.05;margin-bottom:16px;}
+.page-title em{font-style:italic;color:var(--accent);}
+.page-sub{font-size:12px;color:var(--sub);line-height:1.9;max-width:520px;margin-bottom:48px;}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:48px;}
+.feature-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px;}
+.feature-icon{font-size:28px;margin-bottom:12px;}
+.feature-title{font-family:var(--syne);font-size:13px;font-weight:700;color:#fff;margin-bottom:8px;}
+.feature-desc{font-size:11px;color:var(--sub);line-height:1.7;}
+.story-section{margin-bottom:48px;}
+.sec-label{font-size:9px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.sec-label::before{content:'';width:16px;height:1px;background:var(--accent);}
+.story-text{font-size:12px;color:#b0b0c8;line-height:1.95;margin-bottom:12px;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:48px;}
+.stat-block{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
+.stat-num{font-family:var(--syne);font-size:28px;font-weight:800;color:var(--accent);line-height:1;}
+.stat-label{font-size:10px;color:var(--sub);margin-top:6px;line-height:1.5;}
+.domains-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px;}
+.domain-chip{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 18px;font-size:11px;font-family:var(--syne);font-weight:700;color:var(--text);}
+.domain-chip span{color:var(--accent);margin-right:6px;}
+.cta-box{background:var(--s1);border:1px solid var(--accent);border-radius:16px;padding:32px;text-align:center;margin-bottom:48px;}
+.cta-title{font-family:var(--syne);font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;}
+.cta-sub{font-size:11px;color:var(--sub);margin-bottom:20px;line-height:1.7;}
+.cta-btn{display:inline-block;background:var(--accent);color:#06090a;font-family:var(--syne);font-weight:800;font-size:13px;padding:13px 32px;border-radius:10px;text-decoration:none;transition:all .15s;}
+.cta-btn:hover{background:#d4ff7a;transform:translateY(-1px);}
+footer{border-top:1px solid var(--border);padding:24px;text-align:center;}
+footer p{font-size:10px;color:var(--sub);margin:0;}
+footer a{color:var(--sub);margin:0 10px;text-decoration:none;}
+footer a:hover{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <nav>
+    <a class="logo" href="index.html">
+      <div class="logo-mark">RF</div>
+      <div class="logo-name">RoleForge<span>AI</span></div>
+    </a>
+    <a class="back-btn" href="index.html">← Back to Builder</a>
+  </nav>
+
+  <div class="hero-tag">About RoleForgeAI</div>
+  <div class="page-title">Built for students<br/>who deserve to get <em>hired.</em></div>
+  <div class="page-sub">RoleForgeAI is a browser-based ATS resume builder designed specifically for Tech and Law students in India. Build and preview your resume free — download with watermark at no cost, or get a clean PDF for just ₹49. No account needed. No data stored.</div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Works Offline</div>
+      <div class="feature-desc">Entirely browser-based. Your data never leaves your device. No server, no account, no login required.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Live ATS Scoring</div>
+      <div class="feature-desc">Real-time ATS score with actionable feedback — weak verbs, missing metrics, keyword gaps, and more.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚖️</div>
+      <div class="feature-title">Law & Tech Domains</div>
+      <div class="feature-desc">The only free resume builder with dedicated tracks for Law students — Moot Courts, PILs, BigLaw keywords.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✦</div>
+      <div class="feature-title">Smart Bold Formatting</div>
+      <div class="feature-desc">Use **double asterisks** to bold key terms and numbers in your resume output — just like top resumes.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏢</div>
+      <div class="feature-title">Company Profiles</div>
+      <div class="feature-desc">Select target companies like Google, Amazon, BigLaw firms — keywords inject automatically into your ATS score.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📄</div>
+      <div class="feature-title">2 Professional Templates</div>
+      <div class="feature-desc">Classic Corporate and Modern Technical layouts. Print to PDF directly from your browser — clean and ATS-friendly.</div>
+    </div>
+  </div>
+
+  <div class="story-section">
+    <div class="sec-label">Our Story</div>
+    <p class="story-text">RoleForgeAI was built out of frustration. Most resume builders are either too expensive, cluttered with unnecessary features, or simply not designed for Indian students applying to tech companies and law firms.</p>
+    <p class="story-text">We noticed that law students especially had no dedicated tool — every resume builder assumed you were a software engineer. So we built a tool that understands both worlds — the GitHub-and-LeetCode world of tech, and the Moot-Court-and-PIL world of law.</p>
+    <p class="story-text">Everything runs in your browser. Your data is yours. It always will be.</p>
+  </div>
+
+  <div class="sec-label">By The Numbers</div>
+  <div class="stats-row">
+    <div class="stat-block">
+      <div class="stat-num">8+</div>
+      <div class="stat-label">Role tracks for Tech & Law</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num">15+</div>
+      <div class="stat-label">Company keyword profiles</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num">100</div>
+      <div class="stat-label">Point ATS scoring system</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num">₹49</div>
+      <div class="stat-label">One-time watermark-free PDF</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Supported Domains & Roles</div>
+  <div class="domains-row">
+    <div class="domain-chip"><span>⚙️</span>Frontend Engineer</div>
+    <div class="domain-chip"><span>⚙️</span>Backend Engineer</div>
+    <div class="domain-chip"><span>⚙️</span>Full Stack Engineer</div>
+    <div class="domain-chip"><span>⚙️</span>DevOps Engineer</div>
+    <div class="domain-chip"><span>⚙️</span>Data Scientist</div>
+    <div class="domain-chip"><span>⚙️</span>ML / AI Engineer</div>
+    <div class="domain-chip"><span>⚙️</span>Mobile Engineer</div>
+    <div class="domain-chip"><span>⚙️</span>QA / Automation</div>
+    <div class="domain-chip"><span>⚖️</span>Corporate Law</div>
+    <div class="domain-chip"><span>⚖️</span>Litigation</div>
+    <div class="domain-chip"><span>⚖️</span>IP & Technology Law</div>
+  </div>
+
+  <div class="cta-box">
+    <div class="cta-title">Ready to build your resume?</div>
+    <div class="cta-sub">No sign-up. Works in your browser. Download with watermark free — or clean PDF for ₹49.</div>
+    <a class="cta-btn" href="index.html">Start Building →</a>
+  </div>
+
+</div>
+
+<footer>
+  <p>
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="terms.html">Terms & Conditions</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="refund.html">Refund Policy</a>
+    <a href="contact.html">Contact</a>
+  </p>
+  <p style="margin-top:10px;">© 2026 RoleForgeAI. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
