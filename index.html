@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ResumeOS v6 — ATS Resume Builder</title>
+<title>RoleForge v6 — ATS Resume Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -270,7 +270,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);-webkit-font
   <div class="topbar">
     <div class="logo">
       <div class="logo-mark">R</div>
-      <div><div class="logo-name">ResumeOS</div><div class="logo-ver">v6 · ATS Builder</div></div>
+      <div><div class="logo-name">RoleForge</div><div class="logo-ver">v6 · ATS Builder</div></div>
     </div>
     <div class="live-badge"><div class="pulse"></div>ATS Live</div>
   </div>
@@ -497,8 +497,7 @@ const DOMAIN_CONFIG = {
   tech: {
     portfolioLabel:"GitHub / Portfolio",
     portfolioPH:   "github.com/username",
-    extraLinkLabel:"LeetCode / GFG Profile",
-    extraLinkPH:   "leetcode.com/u/username or geeksforgeeks.org/user/username",
+    extraLinkLabel:"LeetCode / GFG Profile",extraLinkPH:   "leetcode.com/u/username or geeksforgeeks.org/user/username",
     expPlaceholder:"Optimized API response time by **40%** using caching strategies\nBuilt automated CI/CD pipeline reducing deployment time by **60%**",
     expCoLabel:    "Company / Organization",
     expRoleLabel:  "Your Role / Title",
@@ -610,18 +609,18 @@ let expCount = 0, projCount = 0, eduCount = 0;
 // Paste your Razorpay Payment Link here, e.g. "https://rzp.io/l/abc123xyz"
 // Create it at dashboard.razorpay.com → Payments → Payment Links → +New,
 // amount ₹49, and turn on "Enable redirection" pointing back to this
-// page's URL (e.g. https://yourname.github.io/resumeos/).
+// page's URL (e.g. https://yourname.github.io/roleforge/).
 const RAZORPAY_LINK = "PASTE_YOUR_RAZORPAY_PAYMENT_LINK_HERE";
 
-const PAID_KEY  = 'resumeos_paid_v1';
-const DRAFT_KEY = 'resumeos_draft_v1';
+const PAID_KEY  = 'roleforge_paid_v1';
+const DRAFT_KEY = 'roleforge_draft_v1';
 
 function isPaid(){ try{ return localStorage.getItem(PAID_KEY) === '1'; }catch(e){ return false; } }
 function setPaid(){ try{ localStorage.setItem(PAID_KEY, '1'); }catch(e){} }
 
 function buildWatermark(){
   if(isPaid()) return '';
-  const row = `<div class="wm-row"><span>RESUMEOS PREVIEW</span><span>RESUMEOS PREVIEW</span><span>RESUMEOS PREVIEW</span></div>`;
+  const row = `<div class="wm-row"><span>ROLEFORGE PREVIEW</span><span>ROLEFORGE PREVIEW</span><span>ROLEFORGE PREVIEW</span></div>`;
   return `<div class="wm-overlay">${row.repeat(9)}</div>`;
 }
 
@@ -996,9 +995,7 @@ function getAllSkillsText(){
 function getAllSkillsCount(){
   const text = getAllSkillsText();
   return text.split(',').map(s=>s.trim()).filter(Boolean).length;
-}
-
-function calcATS(){
+}function calcATS(){
   let score = 0;
   const issues = [], wins = [];
   const cfg = DOMAIN_CONFIG[activeDomain];
@@ -1089,7 +1086,8 @@ function calcATS(){
   let longBullets = 0;
   let totalBullets = 0;
   let firstVerbs = [];
-document.querySelectorAll('[id^="exp-co-"]').forEach(el=>{ if(el.value.trim()) hasExpCo = true; });
+
+  document.querySelectorAll('[id^="exp-co-"]').forEach(el=>{ if(el.value.trim()) hasExpCo = true; });
 
   document.querySelectorAll('[id^="exp-desc-"]').forEach(ta => {
     const val = ta.value.trim();
