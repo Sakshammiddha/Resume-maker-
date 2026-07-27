@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>RoleForge v6 — ATS Resume Builder</title>
+<title>RoleForgeAIAI  — ATS Resume Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -270,7 +270,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);-webkit-font
   <div class="topbar">
     <div class="logo">
       <div class="logo-mark">R</div>
-      <div><div class="logo-name">RoleForge</div><div class="logo-ver">v6 · ATS Builder</div></div>
+      <div><div class="logo-name">RoleForgeAI</div><div class="logo-ver">v6 · ATS Builder</div></div>
     </div>
     <div class="live-badge"><div class="pulse"></div>ATS Live</div>
   </div>
@@ -609,18 +609,18 @@ let expCount = 0, projCount = 0, eduCount = 0;
 // Paste your Razorpay Payment Link here, e.g. "https://rzp.io/l/abc123xyz"
 // Create it at dashboard.razorpay.com → Payments → Payment Links → +New,
 // amount ₹49, and turn on "Enable redirection" pointing back to this
-// page's URL (e.g. https://yourname.github.io/roleforge/).
+// page's URL (e.g. https://yourname.github.io/roleforgeAI/).
 const RAZORPAY_LINK = "PASTE_YOUR_RAZORPAY_PAYMENT_LINK_HERE";
 
-const PAID_KEY  = 'roleforge_paid_v1';
-const DRAFT_KEY = 'roleforge_draft_v1';
+const PAID_KEY  = 'roleforgeAI_paid_v1';
+const DRAFT_KEY = 'roleforgeAI_draft_v1';
 
 function isPaid(){ try{ return localStorage.getItem(PAID_KEY) === '1'; }catch(e){ return false; } }
 function setPaid(){ try{ localStorage.setItem(PAID_KEY, '1'); }catch(e){} }
 
 function buildWatermark(){
   if(isPaid()) return '';
-  const row = `<div class="wm-row"><span>ROLEFORGE PREVIEW</span><span>ROLEFORGE PREVIEW</span><span>ROLEFORGE PREVIEW</span></div>`;
+  const row = `<div class="wm-row"><span>ROLEFORGEAI PREVIEW</span><span>ROLEFORGEAI PREVIEW</span><span>ROLEFORGEAI PREVIEW</span></div>`;
   return `<div class="wm-overlay">${row.repeat(9)}</div>`;
 }
 
