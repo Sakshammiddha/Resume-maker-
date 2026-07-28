@@ -625,9 +625,23 @@ const RAZORPAY_LINK = "https://rzp.io/rzp/oG66wc1";
 
 const PAID_KEY  = 'roleforgeAI_paid_v1';
 const DRAFT_KEY = 'roleforgeAI_draft_v1';
+function isPaid(){
+  try{
+    const paidName = localStorage.getItem(PAID_KEY);
+    if(!paidName || paidName === '1') return false;
+    const nameInput = document.getElementById('f-name');
+    const currentName = nameInput ? nameInput.value.trim().toLowerCase() : '';
+    return !!currentName && currentName === paidName;
+  }catch(e){ return false; }
+}
+function setPaid(){
+  try{
+    const nameInput = document.getElementById('f-name');
+    const currentName = nameInput ? nameInput.value.trim().toLowerCase() : '';
+    if(currentName) localStorage.setItem(PAID_KEY, currentName);
+  }catch(e){}
+}
 
-function isPaid(){ try{ return localStorage.getItem(PAID_KEY) === '1'; }catch(e){ return false; } }
-function setPaid(){ try{ localStorage.setItem(PAID_KEY, '1'); }catch(e){} }
 
 function buildWatermark(){
   if(isPaid()) return '';
@@ -686,11 +700,30 @@ function updateUnlockUI(){
 // ══════════════════════════════════
 // PRINT / SAVE — watermark choice
 // ══════════════════════════════════
-function handlePrintClick(){
-  if(isPaid()){ window.print(); return; }
-  document.getElementById('print-choice-modal').style.display = 'flex';
-}
+function handlePrintClick() {
+    // 1. Check if the page is opened inside the Google Search App or Instagram
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isGoogleApp = /GSA|GSearch|FBAN|FBAV|Instagram|WhatsApp|LinkedInApp/i.test(ua);
 
+    if (isGoogleApp) {
+        alert("The Google Search App does not allow PDF saving.\n\nPlease tap the 3 dots (...) in the top right corner and select 'Open in Chrome' or 'Open in Safari' to save your resume!");
+        return;
+    }
+
+    // 2. Check if current name typed in the form has paid
+    if (isPaid()) { 
+        setTimeout(function() { 
+            window.print(); 
+        }, 200); 
+        return; 
+    }
+    
+    // 3. Open the modal choice (Watermark Free vs Paid)
+    const modal = document.getElementById('print-choice-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
 function closePrintModal(){
   document.getElementById('print-choice-modal').style.display = 'none';
 }
@@ -1531,8 +1564,8 @@ function clearAll(){
   renderRoleGrid(); renderCoGrid();
   addEdu(); addExp(); addProj();
   applyDomainUI();
-  try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
-  updateATS(); showEditor();
+  try{ localStorage.removeItem(DRAFT_KEY); localStorage.removeItem(PAID_KEY); }catch(e){}
+    updateATS(); showEditor();
 }
 </script>
 <footer style="text-align: center; padding: 40px 20px; border-top: 1px solid #1e1e2e; margin-top: 60px; font-family: sans-serif;">
