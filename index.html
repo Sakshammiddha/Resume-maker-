@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>RoleForgeAI  — ATS Resume Builder</title>
@@ -485,7 +486,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);-webkit-font
     <div class="modal-title">Save your resume</div>
     <p class="modal-sub">Choose how you'd like to save it.</p>
     <button class="btn btn-ghost modal-btn" onclick="confirmPrint(false)">Save with watermark — Free</button>
-    <button class="btn btn-primary modal-btn" onclick="confirmPrint(true)">Remove watermark — ₹49</button>
+    <button class="btn btn-primary modal-btn" onclick="goToPayment()">Remove watermark — ₹49</button>
   </div>
 </div>
 
@@ -626,13 +627,31 @@ function buildWatermark(){
 
 function goToPayment(){
   saveDraft();
-  if(!RAZORPAY_LINK || RAZORPAY_LINK.includes('PASTE_YOUR')){
-    alert('Payment isn\'t set up yet — add your Razorpay Payment Link in the RAZORPAY_LINK constant in the code.');
-    return;
-  }
-  window.location.href = RAZORPAY_LINK;
+  const options = {
+    key: "rzp_live_TIdjtr9v8pIcXV",
+    amount: 4900,
+    currency: "INR",
+    name: "RoleForgeAI",
+    description: "Clean PDF Download (No Watermark)",
+    theme: { color: "#C8F56A" },
+    handler: function(response){
+      setPaid();
+      alert('✅ Payment successful! Thank you!\nClick OK to download your clean resume.');
+      generateResume();
+      setTimeout(()=>{ window.print(); }, 1000);
+    },
+    modal: {
+      ondismiss: function(){
+        alert('Payment cancelled. Your resume data is safe!');
+      }
+    }
+  };
+  const rzp = new Razorpay(options);
+  rzp.on('payment.failed', function(response){
+    alert('Payment failed. Please try again.');
+  });
+  rzp.open();
 }
-
 // Razorpay appends razorpay_payment_link_status=paid (plus payment/signature
 // ids) to the redirect URL on success. There's no backend here to verify
 // razorpay_signature, so this is a soft, client-side-only unlock — fine for
