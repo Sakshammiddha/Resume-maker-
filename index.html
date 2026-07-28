@@ -696,11 +696,22 @@ function closePrintModal(){
 }
 
 function confirmPrint(removeWatermark){
-  closePrintModal();
-  if(removeWatermark){ goToPayment(); }
-  else { window.print(); }
-}
+    closePrintModal();
+    if(removeWatermark){ 
+        goToPayment(); 
+    } else { 
+        // 1. Turn on the watermark on screen
+        const watermark = document.getElementById('watermark');
+        if (watermark) {
+            watermark.style.display = 'block';
+        }
 
+        // 2. Wait 300ms so mobile Chrome/Safari can display it before print opens
+        setTimeout(function() {
+            window.print();
+        }, 300);
+    }
+}
 // ══════════════════════════════════
 // DRAFT AUTOSAVE (so a trip to the payment page doesn't wipe the form)
 // ══════════════════════════════════
